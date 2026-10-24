@@ -10,7 +10,7 @@
       --primary: #10b981;
       --primary-dark: #059669;
       --danger: #ef4444;
-      --bg: #f8fafc;
+      --bg: #f1f5f9;
       --card-bg: #ffffff;
       --text: #0f172a;
     }
@@ -18,33 +18,34 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       margin: 0;
-      padding: 10px;
+      padding: 12px;
       padding-bottom: 110px;
       direction: rtl;
       color: var(--text);
     }
-    .header { text-align: center; padding: 4px 0; font-weight: 800; font-size: 18px; color: #1e293b; }
-    .card { background: var(--card-bg); padding: 12px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 10px; border: 1px solid #e2e8f0; }
-    h3 { margin: 0 0 8px 0; color: #334155; font-size: 15px; display: flex; align-items: center; gap: 6px; }
-    label { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 4px; display: block; }
-    input, select { width: 100%; padding: 10px; margin-top: 3px; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #f8fafc; font-weight: 600; }
+    .header { text-align: center; padding: 6px 0; font-weight: 900; font-size: 20px; color: #0f172a; }
+    .card { background: var(--card-bg); padding: 14px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); margin-bottom: 12px; border: 1px solid #e2e8f0; }
+    h3 { margin: 0 0 10px 0; color: #1e293b; font-size: 15px; display: flex; align-items: center; gap: 6px; font-weight: 800; }
+    label { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 6px; display: block; }
+    input, select { width: 100%; padding: 10px 12px; margin-top: 4px; border: 1.5px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-size: 14px; background: #f8fafc; font-weight: 600; outline: none; }
+    input:focus { border-color: var(--primary); background: #fff; }
     
     .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
     .menu-btn {
       position: relative;
       background: #f0fdf4;
-      border: 2px solid #10b981;
-      padding: 12px 8px;
-      border-radius: 12px;
+      border: 2px solid #bbf7d0;
+      padding: 12px 10px;
+      border-radius: 14px;
       text-align: right;
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      transition: transform 0.1s ease, background-color 0.1s ease;
+      transition: all 0.15s ease;
     }
-    .menu-btn:active { background: #bbf7d0; transform: scale(0.93); }
-    .menu-name { font-weight: bold; font-size: 14px; color: #166534; }
-    .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; }
+    .menu-btn:active { background: #86efac; transform: scale(0.95); }
+    .menu-name { font-weight: 800; font-size: 14px; color: #14532d; }
+    .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; font-weight: 700; }
     
     .badge {
       position: absolute;
@@ -53,14 +54,14 @@
       background: #ef4444;
       color: white;
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 900;
       width: 22px;
       height: 22px;
       border-radius: 50%;
       display: none;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
       border: 2px solid white;
     }
 
@@ -71,23 +72,22 @@
       gap: 6px;
       margin-top: 8px;
       margin-bottom: 8px;
-      max-height: 140px;
+      max-height: 130px;
       overflow-y: auto;
-      padding: 4px;
-      background: #f1f5f9;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
+      padding: 6px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
     }
     .exp-btn {
       background: #ffffff;
-      border: 1px solid #94a3b8;
+      border: 1px solid #cbd5e1;
       padding: 6px 10px;
       border-radius: 8px;
       font-size: 12px;
-      font-weight: bold;
+      font-weight: 700;
       color: #334155;
       cursor: pointer;
-      user-select: none;
     }
     .exp-btn:active { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
 
@@ -99,11 +99,11 @@
       background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
       color: white;
       padding: 14px 18px;
-      border-radius: 16px;
+      border-radius: 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+      box-shadow: 0 10px 25px rgba(249, 115, 22, 0.4);
       cursor: pointer;
       z-index: 1000;
       font-weight: 800;
@@ -129,7 +129,7 @@
       width: 100%;
       max-width: 400px;
       border-radius: 20px;
-      padding: 16px;
+      padding: 18px;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
       max-height: 85vh;
       overflow-y: auto;
@@ -139,28 +139,28 @@
     .order-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; }
     .type-btn {
       padding: 10px 4px;
-      border: 2px solid #cbd5e1;
-      background: #f1f5f9;
-      border-radius: 10px;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 12px;
       text-align: center;
-      font-weight: bold;
+      font-weight: 800;
       font-size: 12px;
       cursor: pointer;
-      color: #475569;
+      color: #64748b;
     }
     .type-btn.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
 
     .report-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-top: 8px; margin-bottom: 8px; }
     .tab-btn {
       padding: 8px 2px;
-      border: 1.5px solid #cbd5e1;
-      background: #f1f5f9;
-      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 10px;
       text-align: center;
-      font-weight: bold;
+      font-weight: 700;
       font-size: 11px;
       cursor: pointer;
-      color: #475569;
+      color: #64748b;
     }
     .tab-btn.active { border-color: #10b981; background: #ecfdf5; color: #047857; }
 
@@ -206,26 +206,37 @@
       border: 1px solid #fca5a5;
       border-radius: 10px;
       font-weight: bold;
-      font-size: 13px;
+      font-size: 12px;
       margin-top: 8px;
       cursor: pointer;
     }
 
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
-    .stat { text-align: center; padding: 10px 6px; border-radius: 10px; background: #f1f5f9; border: 1px solid #e2e8f0; }
-    .stat-title { font-size: 11px; color: #64748b; font-weight: 600; }
-    .stat-usd { font-size: 15px; font-weight: 800; margin-top: 2px; }
-    .stat-lbp { font-size: 10px; color: #64748b; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+    .stat { text-align: center; padding: 12px 6px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .stat-title { font-size: 11px; color: #64748b; font-weight: 700; }
+    .stat-usd { font-size: 16px; font-weight: 900; margin-top: 2px; }
+    .stat-lbp { font-size: 11px; color: #64748b; font-weight: 800; }
 
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
 
-    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 250px; overflow-y: auto; }
-    .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 8px 0; font-size: 12px; }
-    .btn-del { background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer; margin-right: 6px; }
+    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 12px; margin-top: 6px; max-height: 250px; overflow-y: auto; }
     
-    .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: bold; color: #78350f; }
-    .rate-box input { width: 90px; padding: 3px 6px; font-size: 12px; text-align: center; margin: 0; }
+    /* تصميم حركات التقرير المختصر */
+    .report-item-compact {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 6px;
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+    .report-item-compact:active { background: #e2e8f0; }
+    .report-item-compact:last-child { border-bottom: none; }
+
+    .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 8px 12px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; color: #78350f; }
+    .rate-box input { width: 95px; padding: 4px 8px; font-size: 12px; text-align: center; margin: 0; }
   </style>
 </head>
 <body>
@@ -308,11 +319,10 @@
     </div>
   </div>
 
-  <!-- تسجيل مصروف / مشتريات مع كبسات سريعة -->
   <div class="card">
     <h3>💸 تسجيل مصروف (مشتريات/فواتير)</h3>
     
-    <label>كبسات سريعة للمشتريات والمصاريف (كبسة زر):</label>
+    <label>كبسات سريعة للمشتريات والمصاريف:</label>
     <div class="expense-quick-grid">
       <button class="exp-btn" onclick="setExpenseItem('سمنة')">سمنة</button>
       <button class="exp-btn" onclick="setExpenseItem('لبن')">لبن</button>
@@ -345,25 +355,18 @@
       <button class="exp-btn" onclick="setExpenseItem('مهدي زعيم')">مهدي زعيم</button>
       <button class="exp-btn" onclick="setExpenseItem('انترنت')">انترنت</button>
       <button class="exp-btn" onclick="setExpenseItem('كربونات')">كربونات</button>
-
       <button class="exp-btn" onclick="setExpenseItem('حامض الليمون')">حامض الليمون</button>
       <button class="exp-btn" onclick="setExpenseItem('ملح')">ملح</button>
-
       <button class="exp-btn" onclick="setExpenseItem('شاي')">شاي</button>
       <button class="exp-btn" onclick="setExpenseItem('سكر')">سكر</button>
-
       <button class="exp-btn" onclick="setExpenseItem('حناك')">حناك</button>
       <button class="exp-btn" onclick="setExpenseItem('لسان')">لسان</button>
-
       <button class="exp-btn" onclick="setExpenseItem('الجاروش')">الجاروش</button>
       <button class="exp-btn" onclick="setExpenseItem('عصب')">عصب</button>
-
       <button class="exp-btn" onclick="setExpenseItem('مقادم')">مقادم</button>
       <button class="exp-btn" onclick="setExpenseItem('لحمة')">لحمة</button>
-
       <button class="exp-btn" onclick="setExpenseItem('مازوت')">مازوت</button>
       <button class="exp-btn" onclick="setExpenseItem('كياس نفايات')">كياس نفايات</button>
-
       <button class="exp-btn" onclick="setExpenseItem('أوردر دليفري')">أوردر دليفري</button>
     </div>
 
@@ -384,7 +387,7 @@
       </div>
     </div>
 
-    <button onclick="saveExpense()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; margin-top:8px; cursor:pointer;">💾 حفظ المصروف</button>
+    <button onclick="saveExpense()" style="width:100%; padding:12px; background:#ef4444; color:white; border:none; border-radius:12px; font-weight:800; margin-top:10px; cursor:pointer;">💾 حفظ المصروف</button>
   </div>
 
   <div class="card">
@@ -401,7 +404,7 @@
         <div id="today-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
     </div>
-    <div class="stat" style="margin-top: 6px; background: #ecfdf5; border-color: #a7f3d0;">
+    <div class="stat" style="margin-top: 8px; background: #ecfdf5; border-color: #a7f3d0;">
       <div class="stat-title" style="color:#047857; font-weight:bold;">💵 الباقي (الصافي)</div>
       <div id="today-net-usd" class="stat-usd" style="font-size:18px;">$0</div>
       <div id="today-net-lbp" class="stat-lbp" style="font-size:12px; font-weight:800;">0 LBP</div>
@@ -437,7 +440,7 @@
         <div id="month-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
     </div>
-    <div class="stat" style="margin-top: 6px; background: #f0fdf4; border-color: #bbf7d0;">
+    <div class="stat" style="margin-top: 8px; background: #f0fdf4; border-color: #bbf7d0;">
       <div class="stat-title" style="color:#15803d;">صافي الربح الشهري</div>
       <div id="month-net-usd" class="stat-usd" style="font-size: 16px;">$0</div>
       <div id="month-net-lbp" class="stat-lbp" style="font-size: 11px; font-weight:bold;">0 LBP</div>
@@ -450,7 +453,7 @@
     <div class="report-tabs">
       <div class="tab-btn active" id="tab-all" onclick="filterReport('all')">📋 الكل</div>
       <div class="tab-btn" id="tab-sales" onclick="filterReport('sales')">🛍️ المبيعات</div>
-      <div class="tab-btn" id="tab-expenses" onclick="filterReport('expenses')">💸 الدفع/المصاريف</div>
+      <div class="tab-btn" id="tab-expenses" onclick="filterReport('expenses')">💸 المصاريف</div>
       <div class="tab-btn" id="tab-sections" onclick="filterReport('sections')">📍 الأقسام</div>
     </div>
 
@@ -470,6 +473,7 @@
     <div id="float-total-lbp" style="font-size:16px;">0 LBP</div>
   </div>
 
+  <!-- Popup الفاتورة الحالية -->
   <div class="modal-overlay" id="cart-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -499,6 +503,27 @@
     </div>
   </div>
 
+  <!-- Popup تفاصيل الحركة عند الكبس بالتقرير -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="margin:0; font-size:16px; color:#1e293b;" id="detail-title">📌 تفاصيل الحركة</h3>
+        <button onclick="closeDetailModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:12px; margin-top:8px; font-size:13px; line-height:1.6;" id="detail-body">
+        جاري التحميل...
+      </div>
+
+      <div style="text-align:center; margin-top:12px; font-weight:bold;">
+        <div style="font-size:18px; color:#10b981;" id="detail-amount-lbp">0 LBP</div>
+        <div style="font-size:12px; color:#64748b;" id="detail-amount-usd">$0.00</div>
+      </div>
+
+      <button id="detail-delete-btn" style="width:100%; padding:12px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:12px; font-weight:800; font-size:14px; margin-top:12px; cursor:pointer;">🗑️ حذف هذه الحركة</button>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = 'https://yjymshmonfhdfjegszbp.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_27rFxO5kcSht7s6befLZOg_meB3MQsy';
@@ -509,7 +534,6 @@
     let globalTodayData = [];
     let cart = [];
 
-    // تحويل الأرقام العربية إلى إنكليزية
     function fixNumbers(inputElem) {
       let str = inputElem.value;
       const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
@@ -618,12 +642,35 @@
       document.getElementById('modal-total-usd').innerText = 'ما يعادل: $' + totalUSD.toFixed(2);
     }
 
-    function openModal() {
-      document.getElementById('cart-modal').classList.add('active');
+    function openModal() { document.getElementById('cart-modal').classList.add('active'); }
+    function closeModal() { document.getElementById('cart-modal').classList.remove('active'); }
+
+    function openDetailModal(id) {
+      const item = globalTodayData.find(x => x.id === id);
+      if (!item) return;
+
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      const amtUSD = Number(item.amount);
+      const lbpValue = Math.round(amtUSD * rate).toLocaleString();
+
+      document.getElementById('detail-title').innerText = item.category;
+      document.getElementById('detail-body').innerText = item.notes || 'لا توجد تفاصيل إضافية.';
+      document.getElementById('detail-amount-lbp').innerText = lbpValue + ' LBP';
+      document.getElementById('detail-amount-usd').innerText = 'ما يعادل: $' + amtUSD.toFixed(2);
+      
+      const delBtn = document.getElementById('detail-delete-btn');
+      delBtn.onclick = async function() {
+        if (confirm('هل أنت تأكد من حذف هذه الحركة؟')) {
+          await deleteEntry(id);
+          closeDetailModal();
+        }
+      };
+
+      document.getElementById('detail-modal').classList.add('active');
     }
 
-    function closeModal() {
-      document.getElementById('cart-modal').classList.remove('active');
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.remove('active');
     }
 
     function shareWhatsApp() {
@@ -651,7 +698,6 @@
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
     }
 
-    // إرسال تقرير اليوم المنسق مع مجموع المبيعات والدفع والباقي
     function shareReportWhatsApp() {
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       const now = new Date();
@@ -755,17 +801,15 @@
     }
 
     async function deleteEntry(id) {
-      if (confirm('هل أنت تأكد من حذف هذه الحركة؟')) {
-        const { error } = await supabaseClient
-          .from('restaurant_expenses')
-          .delete()
-          .eq('id', id);
+      const { error } = await supabaseClient
+        .from('restaurant_expenses')
+        .delete()
+        .eq('id', id);
 
-        if (error) {
-          alert('خطأ بالحذف: ' + error.message);
-        } else {
-          loadData();
-        }
+      if (error) {
+        alert('خطأ بالحذف: ' + error.message);
+      } else {
+        loadData();
       }
     }
 
@@ -835,17 +879,14 @@
         const lbpValue = Math.round(amtUSD * rate).toLocaleString();
         
         todayHtml += `
-          <div class="report-item">
-            <div style="display:flex; align-items:center;">
-              <button class="btn-del" onclick="deleteEntry(${item.id})">🗑️</button>
-              <div>
-                <strong>📌 ${item.category}</strong>
-                <div style="font-size:10px; color:#64748b;">${item.notes || ''}</div>
-              </div>
+          <div class="report-item-compact" onclick="openDetailModal(${item.id})">
+            <div>
+              <strong style="font-size:13px;">📌 ${item.category}</strong>
+              <div style="font-size:10px; color:#94a3b8; margin-top:2px;">إضغط لمشاهدة التفاصيل 🔍</div>
             </div>
             <div style="text-align:left;">
-              <div class="${color}" style="font-weight:bold;">${sign}$${amtUSD.toFixed(2)}</div>
-              <div style="font-size:9px; color:#94a3b8;">${sign}${lbpValue} LBP</div>
+              <div class="${color}" style="font-weight:bold; font-size:13px;">${sign}$${amtUSD.toFixed(2)}</div>
+              <div style="font-size:10px; color:#64748b; font-weight:700;">${sign}${lbpValue} LBP</div>
             </div>
           </div>`;
       });
