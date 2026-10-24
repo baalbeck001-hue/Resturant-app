@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>حسابات المطعم الاحترافية</title>
+  <title>حسابات المطعم السريعة</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -15,81 +15,65 @@
       --text: #0f172a;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       margin: 0;
-      padding: 12px;
+      padding: 10px;
       direction: rtl;
       color: var(--text);
     }
-    .header {
-      text-align: center;
-      padding: 10px 0;
-      font-weight: 800;
-      font-size: 20px;
-      color: #1e293b;
-    }
-    .card {
-      background: var(--card-bg);
-      padding: 16px;
-      border-radius: 18px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-      margin-bottom: 14px;
-      border: 1px solid #e2e8f0;
-    }
-    h3 { margin: 0 0 12px 0; color: #334155; font-size: 16px; display: flex; align-items: center; gap: 6px; }
-    label { font-size: 12px; color: #64748b; font-weight: 700; margin-top: 8px; display: block; }
-    input, select {
-      width: 100%;
-      padding: 12px;
-      margin-top: 4px;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 10px;
-      box-sizing: border-box;
-      font-size: 15px;
-      background: #f8fafc;
-      color: #0f172a;
-      font-weight: 600;
-    }
-    input:focus, select:focus { border-color: var(--primary); outline: none; background: #fff; }
-    .row { display: flex; gap: 8px; }
-    .row > div { flex: 1; }
+    .header { text-align: center; padding: 8px 0; font-weight: 800; font-size: 18px; color: #1e293b; }
+    .card { background: var(--card-bg); padding: 12px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 10px; border: 1px solid #e2e8f0; }
+    h3 { margin: 0 0 8px 0; color: #334155; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+    label { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 4px; display: block; }
+    input, select { width: 100%; padding: 10px; margin-top: 3px; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #f8fafc; font-weight: 600; }
     
+    /* شبكة كبسات المنيو السريع */
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .menu-btn {
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      padding: 10px 8px;
+      border-radius: 10px;
+      text-align: right;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .menu-btn:active { background: #dcfce7; transform: scale(0.97); }
+    .menu-name { font-weight: bold; font-size: 13px; color: #166534; }
+    .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; }
+
     .btn-save {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       font-weight: 800;
-      font-size: 16px;
-      margin-top: 14px;
+      font-size: 15px;
+      margin-top: 10px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-      transition: all 0.2s;
     }
-    .btn-save:active { transform: scale(0.97); }
 
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-    .stat { text-align: center; padding: 12px 8px; border-radius: 12px; background: #f1f5f9; border: 1px solid #e2e8f0; }
-    .stat-title { font-size: 12px; color: #64748b; font-weight: 600; }
-    .stat-usd { font-size: 16px; font-weight: 800; margin-top: 2px; }
-    .stat-lbp { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 1px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .stat { text-align: center; padding: 10px 6px; border-radius: 10px; background: #f1f5f9; border: 1px solid #e2e8f0; }
+    .stat-title { font-size: 11px; color: #64748b; font-weight: 600; }
+    .stat-usd { font-size: 15px; font-weight: 800; margin-top: 2px; }
+    .stat-lbp { font-size: 10px; color: #64748b; font-weight: 700; }
 
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
 
-    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; margin-top: 8px; }
-    .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 8px 0; font-size: 13px; }
-    .report-item:last-child { border-bottom: none; }
-    .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 8px 12px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; color: #78350f; }
-    .rate-box input { width: 100px; padding: 4px 8px; font-size: 13px; text-align: center; margin: 0; }
+    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 150px; overflow-y: auto; }
+    .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 6px 0; font-size: 12px; }
+    .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: bold; color: #78350f; }
+    .rate-box input { width: 90px; padding: 3px 6px; font-size: 12px; text-align: center; margin: 0; }
   </style>
 </head>
 <body>
 
-  <div class="header">🍽️ حسابات المطعم</div>
+  <div class="header">🍽️ حسابات المطعم السريعة</div>
 
   <!-- سعر الصرف -->
   <div class="rate-box">
@@ -97,51 +81,93 @@
     <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
-  <div class="card">
-    <h3>📝 تسجيل حركة جديدة</h3>
-    
-    <div class="row">
-      <div>
-        <label>التاريخ</label>
-        <input type="date" id="entry_date">
+  <!-- لوحة المنيو السريع (كبسة وحدة بتسجل البيعة فوراً) -->
+  <div class="card" style="background: #fdfefe; border: 2px solid #10b981;">
+    <h3 style="color: #047857;">⚡ مبيعات سريعة (كبسة وحدة)</h3>
+    <div class="menu-grid">
+      <div class="menu-btn" onclick="quickSale('فول', 40000)">
+        <div class="menu-name">فول</div>
+        <div class="menu-price">40,000 ليرة</div>
       </div>
-      <div>
-        <label>نوع الحركة</label>
-        <select id="type">
-          <option value="income">مبيعات (+)</option>
-          <option value="expense">مصاريف (-)</option>
-        </select>
+      <div class="menu-btn" onclick="quickSale('بليلة', 40000)">
+        <div class="menu-name">بليلة</div>
+        <div class="menu-price">40,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('مسبحة', 40000)">
+        <div class="menu-name">مسبحة</div>
+        <div class="menu-price">40,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('حمص مطحون', 40000)">
+        <div class="menu-name">حمص مطحون</div>
+        <div class="menu-price">40,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('فتة', 45000)">
+        <div class="menu-name">فتة</div>
+        <div class="menu-price">45,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('فتة اكسترا', 50000)">
+        <div class="menu-name">فتة اكسترا</div>
+        <div class="menu-price">50,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('فتة لسانات', 70000)">
+        <div class="menu-name">فتة لسانات</div>
+        <div class="menu-price">70,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('فتة مقادم', 70000)">
+        <div class="menu-name">فتة مقادم</div>
+        <div class="menu-price">70,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('فتة عصب', 70000)">
+        <div class="menu-name">فتة عصب</div>
+        <div class="menu-price">70,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('بيض مع قوارما', 60000)">
+        <div class="menu-name">بيض مع قوارما</div>
+        <div class="menu-price">60,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('حمص بلحمة', 60000)">
+        <div class="menu-name">حمص بلحمة</div>
+        <div class="menu-price">60,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('فتة لحمة', 70000)">
+        <div class="menu-name">فتة لحمة</div>
+        <div class="menu-price">70,000 ليرة</div>
       </div>
     </div>
+  </div>
 
-    <div class="row">
-      <div>
+  <!-- تسجيل حركة يدوية (مصاريف أو غيره) -->
+  <div class="card">
+    <h3>📝 تسجيل مصروف أو حركة أخرى</h3>
+    <div class="row" style="display:flex; gap:6px;">
+      <div style="flex:1;">
+        <label>نوع الحركة</label>
+        <select id="type">
+          <option value="income">مبيعات أخرى (+)</option>
+          <option value="expense" selected>مصاريف / مشتريات (-)</option>
+        </select>
+      </div>
+      <div style="flex:1;">
         <label>المبلغ</label>
         <input type="number" id="amount" placeholder="0">
       </div>
-      <div>
+    </div>
+    <div class="row" style="display:flex; gap:6px; margin-top:4px;">
+      <div style="flex:1;">
         <label>العملة</label>
         <select id="currency">
-          <option value="USD">دولار ($)</option>
           <option value="LBP">ليرة (LBP)</option>
+          <option value="USD">دولار ($)</option>
         </select>
       </div>
+      <div style="flex:1;">
+        <label>التاريخ</label>
+        <input type="date" id="entry_date">
+      </div>
     </div>
-
-    <label>الفئة</label>
-    <select id="category">
-      <option value="مبيعات">مبيعات اليوم</option>
-      <option value="خضار ولحوم">خضار ولحوم</option>
-      <option value="بضاعة ومواد">بضاعة ومواد</option>
-      <option value="رواتب وأجور">رواتب وأجور</option>
-      <option value="فواتير ونثريات">فواتير ونثريات</option>
-      <option value="أخرى">أخرى</option>
-    </select>
-
-    <label>ملاحظات</label>
-    <input type="text" id="notes" placeholder="تفاصيل إضافية...">
-
-    <button class="btn-save" id="save-btn" onclick="saveEntry()">💾 حفظ الحركة فوراً</button>
+    <label>ملاحظات / تفاصيل المصروف</label>
+    <input type="text" id="notes" placeholder="مثال: فاتورة لحمة، غاز...">
+    <button class="btn-save" id="save-btn" onclick="saveCustomEntry()">💾 حفظ الحركة اليدوية</button>
   </div>
 
   <!-- ملخص اليوم -->
@@ -159,7 +185,7 @@
         <div id="today-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
     </div>
-    <div class="stat" style="margin-top: 8px; background: #ecfdf5;">
+    <div class="stat" style="margin-top: 6px; background: #ecfdf5;">
       <div class="stat-title">صافي اليوم</div>
       <div id="today-net-usd" class="stat-usd">$0</div>
       <div id="today-net-lbp" class="stat-lbp">0 LBP</div>
@@ -181,10 +207,10 @@
         <div id="month-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
     </div>
-    <div class="stat" style="margin-top: 8px; background: #f0fdf4; border-color: #bbf7d0;">
+    <div class="stat" style="margin-top: 6px; background: #f0fdf4; border-color: #bbf7d0;">
       <div class="stat-title" style="color:#15803d;">صافي الربح الشهري</div>
-      <div id="month-net-usd" class="stat-usd" style="font-size: 18px;">$0</div>
-      <div id="month-net-lbp" class="stat-lbp" style="font-size: 12px; font-weight:bold;">0 LBP</div>
+      <div id="month-net-usd" class="stat-usd" style="font-size: 16px;">$0</div>
+      <div id="month-net-lbp" class="stat-lbp" style="font-size: 11px; font-weight:bold;">0 LBP</div>
     </div>
   </div>
 
@@ -203,10 +229,35 @@
 
     document.getElementById('entry_date').valueAsDate = new Date();
 
-    async function saveEntry() {
+    // كبسة سريعة بلمسة واحدة (1-Click Sale)
+    async function quickSale(itemName, priceLBP) {
+      const entry_date = new Date().toISOString().split('T')[0];
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const amountUSD = priceLBP / rate;
+
+      const { error } = await supabaseClient
+        .from('restaurant_expenses')
+        .insert([{ 
+          entry_date: entry_date, 
+          type: 'income', 
+          category: itemName, 
+          amount: amountUSD, 
+          notes: `${priceLBP.toLocaleString()} LBP` 
+        }]);
+
+      if (error) {
+        alert('خطأ: ' + error.message);
+      } else {
+        // تحديث البيانات فوراً
+        loadData();
+      }
+    }
+
+    // حفظ حركة يدوية (مثل المصاريف)
+    async function saveCustomEntry() {
       const entry_date = document.getElementById('entry_date').value;
       const type = document.getElementById('type').value;
-      const category = document.getElementById('category').value;
+      const category = type === 'income' ? 'مبيعات أخرى' : 'مصاريف عامة';
       const amountVal = parseFloat(document.getElementById('amount').value);
       const currency = document.getElementById('currency').value;
       const notes = document.getElementById('notes').value || '';
@@ -217,37 +268,25 @@
         return;
       }
 
-      // تحويل كل شيء للدولار للتخزين الموحد
       let amountUSD = currency === 'USD' ? amountVal : (amountVal / rate);
 
-      const btn = document.getElementById('save-btn');
-      btn.innerText = 'جاري الحفظ...';
-      btn.disabled = true;
+      const { error } = await supabaseClient
+        .from('restaurant_expenses')
+        .insert([{ 
+          entry_date, 
+          type, 
+          category, 
+          amount: amountUSD, 
+          notes: notes ? `${notes} (${amountVal} ${currency})` : `${amountVal} ${currency}` 
+        }]);
 
-      try {
-        const { error } = await supabaseClient
-          .from('restaurant_expenses')
-          .insert([{ 
-            entry_date, 
-            type, 
-            category, 
-            amount: amountUSD, 
-            notes: notes ? `${notes} (${amountVal} ${currency})` : `${amountVal} ${currency}` 
-          }]);
-
-        if (error) {
-          alert('خطأ: ' + error.message);
-        } else {
-          alert('تم الحفظ بنجاح! ✅');
-          document.getElementById('amount').value = '';
-          document.getElementById('notes').value = '';
-          loadData();
-        }
-      } catch (err) {
-        alert('خطأ: ' + err.message);
-      } finally {
-        btn.innerText = '💾 حفظ الحركة فوراً';
-        btn.disabled = false;
+      if (error) {
+        alert('خطأ: ' + error.message);
+      } else {
+        alert('تم الحفظ بنجاح! ✅');
+        document.getElementById('amount').value = '';
+        document.getElementById('notes').value = '';
+        loadData();
       }
     }
 
@@ -275,11 +314,9 @@
         data.forEach(item => {
           const amtUSD = Number(item.amount);
           
-          // الشهر
           if (item.type === 'income') mInc += amtUSD;
           if (item.type === 'expense') mExp += amtUSD;
 
-          // اليوم
           if (item.entry_date === todayStr) {
             if (item.type === 'income') tInc += amtUSD;
             if (item.type === 'expense') tExp += amtUSD;
@@ -292,17 +329,17 @@
               <div class="report-item">
                 <div>
                   <strong>📌 ${item.category}</strong>
-                  <div style="font-size:11px; color:#64748b;">${item.notes || ''}</div>
+                  <div style="font-size:10px; color:#64748b;">${item.notes || ''}</div>
                 </div>
                 <div style="text-align:left;">
                   <div class="${color}" style="font-weight:bold;">${sign}$${amtUSD.toFixed(2)}</div>
-                  <div style="font-size:10px; color:#94a3b8;">${sign}${lbpValue} LBP</div>
+                  <div style="font-size:9px; color:#94a3b8;">${sign}${lbpValue} LBP</div>
                 </div>
               </div>`;
           }
         });
 
-        // تحديث أرقام اليوم
+        // تحديث الأرقام
         document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
         document.getElementById('today-inc-lbp').innerText = (tInc * rate).toLocaleString() + ' LBP';
         document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
@@ -314,7 +351,6 @@
         tNetElem.className = 'stat-usd ' + (tNet >= 0 ? 'income' : 'expense');
         document.getElementById('today-net-lbp').innerText = (tNet * rate).toLocaleString() + ' LBP';
 
-        // تحديث أرقام الشهر
         document.getElementById('month-inc-usd').innerText = '$' + mInc.toFixed(2);
         document.getElementById('month-inc-lbp').innerText = (mInc * rate).toLocaleString() + ' LBP';
         document.getElementById('month-exp-usd').innerText = '$' + mExp.toFixed(2);
@@ -326,7 +362,6 @@
         mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
         document.getElementById('month-net-lbp').innerText = (mNet * rate).toLocaleString() + ' LBP';
 
-        // قائمة اليوم
         document.getElementById('today-report').innerHTML = todayHtml || 'لا توجد حركات مسجلة اليوم حتى الآن.';
       }
     }
