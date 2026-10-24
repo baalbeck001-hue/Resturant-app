@@ -336,7 +336,29 @@
     <button class="btn-save-exp" onclick="saveHouseExpense()">💾 Save Expense (تسجيل مصروف)</button>
   </div>
 
-  <!-- 📂 ARCHIVE & DATE HISTORY (خنة التاريخ) -->
+  <!-- 📅 MONTHLY SUMMARY (التقرير الشهري الجديد) -->
+  <div class="card">
+    <h3>📅 Monthly House Summary</h3>
+    <div class="grid">
+      <div class="stat">
+        <div class="stat-title">Monthly Income</div>
+        <div id="month-inc-usd" class="stat-usd income">$0</div>
+        <div id="month-inc-lbp" class="stat-lbp">0 LBP</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Monthly Expenses</div>
+        <div id="month-exp-usd" class="stat-usd expense">$0</div>
+        <div id="month-exp-lbp" class="stat-lbp">0 LBP</div>
+      </div>
+    </div>
+    <div class="stat" style="margin-top: 10px; background: #f0fdf4; border-color: #bbf7d0;">
+      <div class="stat-title" style="color:#15803d;">Monthly Net Balance</div>
+      <div id="month-net-usd" class="stat-usd" style="font-size: 17px;">$0</div>
+      <div id="month-net-lbp" class="stat-lbp" style="font-size: 11px; font-weight:bold;">0 LBP</div>
+    </div>
+  </div>
+
+  <!-- 📂 ARCHIVE & DATE HISTORY -->
   <div class="card">
     <h3>📂 Archive & Date History</h3>
     <div class="row">
@@ -345,17 +367,17 @@
     </div>
   </div>
 
-  <!-- 📊 HOUSE SUMMARY -->
+  <!-- 📊 HOUSE DAILY SUMMARY -->
   <div class="card">
     <h3>📊 House Daily Summary</h3>
     <div class="grid">
       <div class="stat">
-        <div class="stat-title">Total Income (قبض)</div>
+        <div class="stat-title">Today Income (قبض)</div>
         <div id="house-inc-usd" class="stat-usd income">$0</div>
         <div id="house-inc-lbp" class="stat-lbp">0 LBP</div>
       </div>
       <div class="stat">
-        <div class="stat-title">Total Expenses (صرف)</div>
+        <div class="stat-title">Today Expenses (صرف)</div>
         <div id="house-exp-usd" class="stat-usd expense">$0</div>
         <div id="house-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
@@ -528,17 +550,23 @@
         return;
       }
 
+      let mInc = 0, mExp = 0;
       let tInc = 0, tExp = 0;
       let todayHtml = '';
       globalHouseData = data || [];
       globalTodayHouseData = [];
 
       globalHouseData.forEach(item => {
+        const amtUSD = Number(item.amount);
+        const isIncome = item.category === 'income';
+
+        // حسابات الشهر
+        if (isIncome) mInc += amtUSD;
+        else mExp += amtUSD;
+
+        // حسابات اليوم المحدد
         if (item.entry_date === todayStr) {
           globalTodayHouseData.push(item);
-          const amtUSD = Number(item.amount);
-          const isIncome = item.category === 'income';
-          
           if (isIncome) tInc += amtUSD;
           else tExp += amtUSD;
 
@@ -556,8 +584,8 @@
         }
       });
 
+      // عرض بيانات اليوم
       const tNet = tInc - tExp;
-
       document.getElementById('house-inc-usd').innerText = '$' + tInc.toFixed(2);
       document.getElementById('house-inc-lbp').innerText = Math.round(tInc * rate).toLocaleString() + ' LBP';
       document.getElementById('house-exp-usd').innerText = '$' + tExp.toFixed(2);
@@ -567,6 +595,18 @@
       netElem.innerText = '$' + tNet.toFixed(2);
       netElem.className = 'stat-usd ' + (tNet >= 0 ? 'income' : 'expense');
       document.getElementById('house-net-lbp').innerText = Math.round(tNet * rate).toLocaleString() + ' LBP';
+
+      // عرض بيانات الشهر الجديد (Monthly Summary)
+      const mNet = mInc - mExp;
+      document.getElementById('month-inc-usd').innerText = '$' + mInc.toFixed(2);
+      document.getElementById('month-inc-lbp').innerText = Math.round(mInc * rate).toLocaleString() + ' LBP';
+      document.getElementById('month-exp-usd').innerText = '$' + mExp.toFixed(2);
+      document.getElementById('month-exp-lbp').innerText = Math.round(mExp * rate).toLocaleString() + ' LBP';
+
+      const mNetElem = document.getElementById('month-net-usd');
+      mNetElem.innerText = '$' + mNet.toFixed(2);
+      mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
+      document.getElementById('month-net-lbp').innerText = Math.round(mNet * rate).toLocaleString() + ' LBP';
 
       document.getElementById('house-report').innerHTML = todayHtml || 'No records for this date.';
     }
