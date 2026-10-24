@@ -19,7 +19,7 @@
       background: var(--bg);
       margin: 0;
       padding: 10px;
-      padding-bottom: 90px;
+      padding-bottom: 95px;
       direction: rtl;
       color: var(--text);
     }
@@ -60,17 +60,17 @@
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
       border: 2px solid white;
-      display: none;
     }
 
+    /* البار العائم السريع بالأسفل */
     .floating-cart-bar {
       position: fixed;
-      bottom: 15px;
+      bottom: 12px;
       left: 12px;
       right: 12px;
       background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
@@ -82,9 +82,8 @@
       align-items: center;
       box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
       cursor: pointer;
-      z-index: 100;
+      z-index: 1000;
       font-weight: 800;
-      display: none;
     }
 
     .modal-overlay {
@@ -95,7 +94,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 2000;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease;
@@ -181,67 +180,67 @@
   <div class="card">
     <h3 style="color: #047857;">⚡ اختر الوجبات للفاتورة</h3>
     <div class="menu-grid">
-      <div class="menu-btn" id="btn-فول" onclick="addToCart('فول', 400000)">
+      <div class="menu-btn" onclick="addToCart('فول', 400000)">
         <div class="badge" id="badge-فول">0</div>
         <div class="menu-name">فول</div>
         <div class="menu-price">400,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-بليلة" onclick="addToCart('بليلة', 400000)">
+      <div class="menu-btn" onclick="addToCart('بليلة', 400000)">
         <div class="badge" id="badge-بليلة">0</div>
         <div class="menu-name">بليلة</div>
         <div class="menu-price">400,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-مسبحة" onclick="addToCart('مسبحة', 400000)">
+      <div class="menu-btn" onclick="addToCart('مسبحة', 400000)">
         <div class="badge" id="badge-مسبحة">0</div>
         <div class="menu-name">مسبحة</div>
         <div class="menu-price">400,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-حمص مطحون" onclick="addToCart('حمص مطحون', 400000)">
+      <div class="menu-btn" onclick="addToCart('حمص مطحون', 400000)">
         <div class="badge" id="badge-حمص مطحون">0</div>
         <div class="menu-name">حمص مطحون</div>
         <div class="menu-price">400,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة" onclick="addToCart('فتة', 450000)">
+      <div class="menu-btn" onclick="addToCart('فتة', 450000)">
         <div class="badge" id="badge-فتة">0</div>
         <div class="menu-name">فتة</div>
         <div class="menu-price">450,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة اكسترا" onclick="addToCart('فتة اكسترا', 550000)">
+      <div class="menu-btn" onclick="addToCart('فتة اكسترا', 550000)">
         <div class="badge" id="badge-فتة اكسترا">0</div>
         <div class="menu-name">فتة اكسترا</div>
         <div class="menu-price">550,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة لسانات" onclick="addToCart('فتة لسانات', 700000)">
+      <div class="menu-btn" onclick="addToCart('فتة لسانات', 700000)">
         <div class="badge" id="badge-فتة لسانات">0</div>
         <div class="menu-name">فتة لسانات</div>
         <div class="menu-price">700,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة مقادم" onclick="addToCart('فتة مقادم', 700000)">
+      <div class="menu-btn" onclick="addToCart('فتة مقادم', 700000)">
         <div class="badge" id="badge-فتة مقادم">0</div>
         <div class="menu-name">فتة مقادم</div>
         <div class="menu-price">700,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة عصب" onclick="addToCart('فتة عصب', 700000)">
+      <div class="menu-btn" onclick="addToCart('فتة عصب', 700000)">
         <div class="badge" id="badge-فتة عصب">0</div>
         <div class="menu-name">فتة عصب</div>
         <div class="menu-price">700,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-بيض مع قوارما" onclick="addToCart('بيض مع قوارما', 600000)">
+      <div class="menu-btn" onclick="addToCart('بيض مع قوارما', 600000)">
         <div class="badge" id="badge-بيض مع قوارما">0</div>
         <div class="menu-name">بيض مع قوارما</div>
         <div class="menu-price">600,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-حمص بلحمة" onclick="addToCart('حمص بلحمة', 600000)">
+      <div class="menu-btn" onclick="addToCart('حمص بلحمة', 600000)">
         <div class="badge" id="badge-حمص بلحمة">0</div>
         <div class="menu-name">حمص بلحمة</div>
         <div class="menu-price">600,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة لحمة" onclick="addToCart('فتة لحمة', 650000)">
+      <div class="menu-btn" onclick="addToCart('فتة لحمة', 650000)">
         <div class="badge" id="badge-فتة لحمة">0</div>
         <div class="menu-name">فتة لحمة</div>
         <div class="menu-price">650,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-مرطبات" onclick="addToCart('مرطبات', 50000)">
+      <div class="menu-btn" onclick="addToCart('مرطبات', 50000)">
         <div class="badge" id="badge-مرطبات">0</div>
         <div class="menu-name">مرطبات</div>
         <div class="menu-price">50,000 LBP</div>
@@ -323,7 +322,7 @@
   </div>
 
   <!-- الزر العائم لفتح الفاتورة -->
-  <div class="floating-cart-bar" id="floating-cart-btn" onclick="openModal()">
+  <div class="floating-cart-bar" onclick="openModal()">
     <div style="display:flex; align-items:center; gap:8px;">
       <span style="font-size:18px;">🛒</span>
       <span>عرض الفاتورة (<span id="float-count">0</span> أصناف)</span>
@@ -339,7 +338,6 @@
         <button onclick="closeModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
       </div>
 
-      <!-- قسم نوع الطلب -->
       <label>نوع الطلب:</label>
       <div class="order-type-grid">
         <div class="type-btn active" id="type-hall" onclick="setOrderType('داخل المطعم')">🏠 صالة</div>
@@ -347,19 +345,17 @@
         <div class="type-btn" id="type-delivery" onclick="setOrderType('دليفري')">🛵 دليفري</div>
       </div>
 
-      <!-- الأصناف المضافة -->
       <div id="cart-items" class="cart-box">
         لا توجد وجبات بالفاتورة.
       </div>
 
-      <!-- مجموع الفاتورة -->
       <div style="text-align:center; margin-top:12px; font-weight:bold;">
         <div style="font-size:18px; color:#ea580c;" id="modal-total-lbp">0 LBP</div>
         <div style="font-size:12px; color:#64748b;" id="modal-total-usd">ما يعادل: $0.00</div>
       </div>
 
       <button class="btn-save" id="save-order-btn" onclick="saveOrder()">✅ حفظ الفاتورة بالحسابات</button>
-      <button onclick="clearCart(); closeModal();" style="width:100%; background:none; border:none; color:#dc2626; font-size:12px; font-weight:bold; margin-top:8px; cursor:pointer;">إلغاء وإفرغ الفاتورة</button>
+      <button onclick="clearCart(); closeModal();" style="width:100%; background:none; border:none; color:#dc2626; font-size:12px; font-weight:bold; margin-top:8px; cursor:pointer;">🗑️ تفريغ الفاتورة وإلغاء</button>
     </div>
   </div>
 
@@ -426,14 +422,8 @@
         }
       });
 
-      const floatBtn = document.getElementById('floating-cart-bar');
-      if (totalItemsCount > 0) {
-        floatBtn.style.display = 'flex';
-        document.getElementById('float-count').innerText = totalItemsCount;
-        document.getElementById('float-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
-      } else {
-        floatBtn.style.display = 'none';
-      }
+      document.getElementById('float-count').innerText = totalItemsCount;
+      document.getElementById('float-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
 
       const container = document.getElementById('cart-items');
       if (cart.length === 0) {
@@ -470,7 +460,10 @@
     }
 
     async function saveOrder() {
-      if (cart.length === 0) return;
+      if (cart.length === 0) {
+        alert('الرجاء اختيار وجبات أولاً!');
+        return;
+      }
 
       const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
       let totalLBP = 0;
