@@ -19,7 +19,7 @@
       background: var(--bg);
       margin: 0;
       padding: 10px;
-      padding-bottom: 95px;
+      padding-bottom: 110px;
       direction: rtl;
       color: var(--text);
     }
@@ -188,13 +188,11 @@
 
   <div class="header">🍽️ إدارة طلبات وحسابات المطعم</div>
 
-  <!-- سعر الصرف -->
   <div class="rate-box">
     <span>سعر الصرف ($1 = LBP):</span>
     <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
-  <!-- لوحة المنيو السريع -->
   <div class="card">
     <h3 style="color: #047857;">⚡ اختر الوجبات للفاتورة</h3>
     <div class="menu-grid">
@@ -266,7 +264,6 @@
     </div>
   </div>
 
-  <!-- تسجيل مصروف يدوي -->
   <div class="card">
     <h3>💸 تسجيل مصروف (مشتريات/فواتير)</h3>
     <div class="row" style="display:flex; gap:6px;">
@@ -287,7 +284,6 @@
     <button onclick="saveExpense()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; margin-top:8px; cursor:pointer;">💾 حفظ المصروف</button>
   </div>
 
-  <!-- ملخص اليوم -->
   <div class="card">
     <h3>☀️ ملخص اليوم</h3>
     <div class="grid">
@@ -308,7 +304,6 @@
       <div id="today-net-lbp" class="stat-lbp">0 LBP</div>
     </div>
     
-    <!-- تفكيك أقسام مبيعات اليوم -->
     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:8px; font-size:10px; text-align:center;">
       <div style="background:#eff6ff; padding:6px; border-radius:8px; border:1px solid #bfdbfe;">
         <div style="color:#1d4ed8; font-weight:bold;">🏠 صالة</div>
@@ -325,7 +320,6 @@
     </div>
   </div>
 
-  <!-- ملخص الشهر -->
   <div class="card">
     <h3>📅 ملخص الشهر الحالي</h3>
     <div class="grid">
@@ -347,7 +341,6 @@
     </div>
   </div>
 
-  <!-- تفاصيل حركات اليوم -->
   <div class="card">
     <h3>🔍 حركات اليوم التفصيلية</h3>
     <div id="today-report" class="report-box">
@@ -494,7 +487,6 @@
       document.getElementById('cart-modal').classList.remove('active');
     }
 
-    // إرسال الفاتورة للواتساب
     function shareWhatsApp() {
       if (cart.length === 0) {
         alert('الفاتورة فارغة!');
@@ -572,7 +564,6 @@
       }
     }
 
-    // حذف حركة من Supabase
     async function deleteEntry(id) {
       if (confirm('هل أنت تأكد من حذف هذه الحركة؟')) {
         const { error } = await supabaseClient
