@@ -65,7 +65,6 @@
       border: 2px solid white;
     }
 
-    /* أزرار المشتريات السريعة */
     .expense-quick-grid {
       display: flex;
       flex-wrap: wrap;
@@ -222,7 +221,6 @@
 
     .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 12px; margin-top: 6px; max-height: 250px; overflow-y: auto; }
     
-    /* تصميم حركات التقرير المختصر */
     .report-item-compact {
       display: flex;
       justify-content: space-between;
@@ -427,6 +425,16 @@
   </div>
 
   <div class="card">
+    <h3>📂 أرشيف الشهور والتاريخ السابق</h3>
+    <div class="row" style="display:flex; gap:6px;">
+      <div style="flex:1;">
+        <label>اختر يوماً محدداً:</label>
+        <input type="date" id="archive-date" onchange="loadArchiveData()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <h3>📅 ملخص الشهر الحالي</h3>
     <div class="grid">
       <div class="stat">
@@ -473,7 +481,6 @@
     <div id="float-total-lbp" style="font-size:16px;">0 LBP</div>
   </div>
 
-  <!-- Popup الفاتورة الحالية -->
   <div class="modal-overlay" id="cart-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -503,7 +510,6 @@
     </div>
   </div>
 
-  <!-- Popup تفاصيل الحركة عند الكبس بالتقرير -->
   <div class="modal-overlay" id="detail-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -700,8 +706,7 @@
 
     function shareReportWhatsApp() {
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
-      const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const selectedDate = document.getElementById('archive-date').value || new Date().toISOString().split('T')[0];
 
       let tInc = 0;
       let tExp = 0;
@@ -714,8 +719,8 @@
 
       const tNet = tInc - tExp;
 
-      let msg = `📊 *التقرير اليومي للصندوق*\n`;
-      msg += `📅 *التاريخ:* ${todayStr}\n`;
+      let msg = `📊 *التقرير المالي للصندوق*\n`;
+      msg += `📅 *التاريخ:* ${selectedDate}\n`;
       msg += `---------------------\n`;
       msg += `🛍️ *مجموع المبيعات:* ${Math.round(tInc * rate).toLocaleString()} LBP ($${tInc.toFixed(2)})\n`;
       msg += `💸 *مجموع الدفع (المصاريف):* ${Math.round(tExp * rate).toLocaleString()} LBP ($${tExp.toFixed(2)})\n`;
@@ -726,11 +731,17 @@
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
     }
 
+    async function loadArchiveData() {
+      const selectedDate = document.getElementById('archive-date').value;
+      if (!selectedDate) return;
+      loadData(selectedDate);
+    }
+
     async function resetTodayEntries() {
-      if (confirm('هل أنت تأكد من حذف وتصفير جميع حركات اليوم؟')) {
+      if (confirm('هل أنت تأكد من حذف وتصفير جميع حركات هذا اليوم؟')) {
         const idsToDelete = globalTodayData.map(item => item.id);
         if (idsToDelete.length === 0) {
-          alert('لا توجد حركات اليوم لتصفيرها!');
+          alert('لا توجد حركات لتصفيرها!');
           return;
         }
 
@@ -742,7 +753,7 @@
         if (error) {
           alert('خطأ بالتصفير: ' + error.message);
         } else {
-          alert('تم تصفير حسابات اليوم بنجاح! ✅');
+          alert('تم تصفير الحسابات بنجاح! ✅');
           loadData();
         }
       }
@@ -868,7 +879,7 @@
       });
 
       if (filtered.length === 0) {
-        document.getElementById('today-report').innerHTML = 'لا توجد بيانات مسجلة اليوم.';
+        document.getElementById('today-report').innerHTML = 'لا توجد بيانات مسجلة.';
         return;
       }
 
@@ -894,15 +905,16 @@
       document.getElementById('today-report').innerHTML = todayHtml;
     }
 
-    async function loadData() {
+    async function loadData(targetDate) {
       const rateElem = document.getElementById('exchange-rate');
       const rate = parseArabicNumber(rateElem.value) || 90000;
       
       const now = new Date();
+      const todayStr = targetDate || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      document.getElementById('archive-date').value = todayStr;
+
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
       const { data, error } = await supabaseClient
         .from('restaurant_expenses')
