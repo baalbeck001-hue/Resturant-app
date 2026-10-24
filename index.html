@@ -3,39 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>حسابات المطعم</title>
-  <!-- تحميل مكتبة Supabase -->
+  <title>حسابات المطعم الاحترافية</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --primary: #10b981; --danger: #ef4444; --bg: #f3f4f6; --primary-dark: #059669; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 12px; direction: rtl; color: #1f2937; }
-    .card { background: white; padding: 14px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 12px; }
-    h2, h3 { margin: 0 0 10px 0; color: #1f2937; text-align: center; font-size: 18px; }
-    label { font-size: 13px; color: #4b5563; font-weight: bold; margin-top: 6px; display: block; }
-    input, select { width: 100%; padding: 10px; margin-top: 3px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 15px; background: #fff; }
-    .btn-save { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3); }
-    .btn-save:active { background: var(--primary-dark); transform: scale(0.98); }
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 12px;
+      direction: rtl;
+      color: var(--text);
+    }
+    .header {
+      text-align: center;
+      padding: 10px 0;
+      font-weight: 800;
+      font-size: 20px;
+      color: #1e293b;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 18px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+      margin-bottom: 14px;
+      border: 1px solid #e2e8f0;
+    }
+    h3 { margin: 0 0 12px 0; color: #334155; font-size: 16px; display: flex; align-items: center; gap: 6px; }
+    label { font-size: 12px; color: #64748b; font-weight: 700; margin-top: 8px; display: block; }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 4px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 15px;
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 600;
+    }
+    input:focus, select:focus { border-color: var(--primary); outline: none; background: #fff; }
+    .row { display: flex; gap: 8px; }
+    .row > div { flex: 1; }
+    
+    .btn-save {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 16px;
+      margin-top: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-save:active { transform: scale(0.97); }
+
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-    .stat { text-align: center; padding: 10px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; }
-    .stat-val { font-size: 16px; font-weight: bold; margin-top: 2px; }
+    .stat { text-align: center; padding: 12px 8px; border-radius: 12px; background: #f1f5f9; border: 1px solid #e2e8f0; }
+    .stat-title { font-size: 12px; color: #64748b; font-weight: 600; }
+    .stat-usd { font-size: 16px; font-weight: 800; margin-top: 2px; }
+    .stat-lbp { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 1px; }
+
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
-    .report-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 14px; }
-    .report-title { font-weight: bold; color: #1e40af; margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dashed #dbeafe; padding-bottom: 4px; }
+
+    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; margin-top: 8px; }
+    .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 8px 0; font-size: 13px; }
+    .report-item:last-child { border-bottom: none; }
+    .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 8px 12px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; color: #78350f; }
+    .rate-box input { width: 100px; padding: 4px 8px; font-size: 13px; text-align: center; margin: 0; }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>تسجيل حركة اليوم</h2>
-    <label>التاريخ</label>
-    <input type="date" id="entry_date">
+  <div class="header">🍽️ حسابات المطعم</div>
 
-    <label>نوع الحركة</label>
-    <select id="type">
-      <option value="income">مبيعات / مداخيل (+)</option>
-      <option value="expense">مصاريف / مشتريات (-)</option>
-    </select>
+  <!-- سعر الصرف -->
+  <div class="rate-box">
+    <span>سعر الصرف ($1 = LBP):</span>
+    <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
+  </div>
+
+  <div class="card">
+    <h3>📝 تسجيل حركة جديدة</h3>
+    
+    <div class="row">
+      <div>
+        <label>التاريخ</label>
+        <input type="date" id="entry_date">
+      </div>
+      <div>
+        <label>نوع الحركة</label>
+        <select id="type">
+          <option value="income">مبيعات (+)</option>
+          <option value="expense">مصاريف (-)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>المبلغ</label>
+        <input type="number" id="amount" placeholder="0">
+      </div>
+      <div>
+        <label>العملة</label>
+        <select id="currency">
+          <option value="USD">دولار ($)</option>
+          <option value="LBP">ليرة (LBP)</option>
+        </select>
+      </div>
+    </div>
 
     <label>الفئة</label>
     <select id="category">
@@ -47,50 +138,68 @@
       <option value="أخرى">أخرى</option>
     </select>
 
-    <label>المبلغ</label>
-    <input type="number" id="amount" placeholder="0">
-
     <label>ملاحظات</label>
-    <input type="text" id="notes" placeholder="مثال: فاتورة لحمة...">
+    <input type="text" id="notes" placeholder="تفاصيل إضافية...">
 
     <button class="btn-save" id="save-btn" onclick="saveEntry()">💾 حفظ الحركة فوراً</button>
   </div>
 
+  <!-- ملخص اليوم -->
   <div class="card">
-    <h3>📊 ملخص الشهر الحالي</h3>
+    <h3>☀️ ملخص اليوم</h3>
     <div class="grid">
       <div class="stat">
-        <div>إجمالي المبيعات</div>
-        <div id="total-income" class="stat-val income">0</div>
+        <div class="stat-title">مبيعات اليوم</div>
+        <div id="today-inc-usd" class="stat-usd income">$0</div>
+        <div id="today-inc-lbp" class="stat-lbp">0 LBP</div>
       </div>
       <div class="stat">
-        <div>إجمالي المصاريف</div>
-        <div id="total-expense" class="stat-val expense">0</div>
+        <div class="stat-title">مصاريف اليوم</div>
+        <div id="today-exp-usd" class="stat-usd expense">$0</div>
+        <div id="today-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
     </div>
     <div class="stat" style="margin-top: 8px; background: #ecfdf5;">
-      <div>صافي الربح الشهري</div>
-      <div id="net-profit" class="stat-val" style="font-size: 18px;">0</div>
+      <div class="stat-title">صافي اليوم</div>
+      <div id="today-net-usd" class="stat-usd">$0</div>
+      <div id="today-net-lbp" class="stat-lbp">0 LBP</div>
     </div>
   </div>
 
+  <!-- ملخص الشهر -->
   <div class="card">
-    <h3>🔍 تقرير اليوم (آخر الحركات)</h3>
+    <h3>📅 ملخص الشهر الحالي</h3>
+    <div class="grid">
+      <div class="stat">
+        <div class="stat-title">إجمالي المبيعات</div>
+        <div id="month-inc-usd" class="stat-usd income">$0</div>
+        <div id="month-inc-lbp" class="stat-lbp">0 LBP</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">إجمالي المصاريف</div>
+        <div id="month-exp-usd" class="stat-usd expense">$0</div>
+        <div id="month-exp-lbp" class="stat-lbp">0 LBP</div>
+      </div>
+    </div>
+    <div class="stat" style="margin-top: 8px; background: #f0fdf4; border-color: #bbf7d0;">
+      <div class="stat-title" style="color:#15803d;">صافي الربح الشهري</div>
+      <div id="month-net-usd" class="stat-usd" style="font-size: 18px;">$0</div>
+      <div id="month-net-lbp" class="stat-lbp" style="font-size: 12px; font-weight:bold;">0 LBP</div>
+    </div>
+  </div>
+
+  <!-- تفاصيل حركات اليوم -->
+  <div class="card">
+    <h3>🔍 حركات اليوم التفصيلية</h3>
     <div id="today-report" class="report-box">
-      جاري تحميل الحركات...
+      جاري التحميل...
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://yjymshmonfhdfjegszbp.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_27rFxO5kcSht7s6befLZOg_meB3MQsy';
-    
-    let supabaseClient = null;
-    try {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } catch (err) {
-      alert('خطأ في الاتصال بقاعدة البيانات: ' + err.message);
-    }
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     document.getElementById('entry_date').valueAsDate = new Date();
 
@@ -98,26 +207,36 @@
       const entry_date = document.getElementById('entry_date').value;
       const type = document.getElementById('type').value;
       const category = document.getElementById('category').value;
-      const amountVal = document.getElementById('amount').value;
+      const amountVal = parseFloat(document.getElementById('amount').value);
+      const currency = document.getElementById('currency').value;
       const notes = document.getElementById('notes').value || '';
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
 
       if (!amountVal || amountVal <= 0) {
-        alert('الرجاء إدخال مبلغ صحيح أكبر من الصفر!');
+        alert('الرجاء إدخال مبلغ صحيح!');
         return;
       }
 
-      const amount = parseFloat(amountVal);
+      // تحويل كل شيء للدولار للتخزين الموحد
+      let amountUSD = currency === 'USD' ? amountVal : (amountVal / rate);
+
       const btn = document.getElementById('save-btn');
       btn.innerText = 'جاري الحفظ...';
       btn.disabled = true;
 
       try {
-        const { data, error } = await supabaseClient
+        const { error } = await supabaseClient
           .from('restaurant_expenses')
-          .insert([{ entry_date, type, category, amount, notes }]);
+          .insert([{ 
+            entry_date, 
+            type, 
+            category, 
+            amount: amountUSD, 
+            notes: notes ? `${notes} (${amountVal} ${currency})` : `${amountVal} ${currency}` 
+          }]);
 
         if (error) {
-          alert('خطأ من السيرفر: ' + error.message);
+          alert('خطأ: ' + error.message);
         } else {
           alert('تم الحفظ بنجاح! ✅');
           document.getElementById('amount').value = '';
@@ -125,7 +244,7 @@
           loadData();
         }
       } catch (err) {
-        alert('حدث خطأ غير متوقع: ' + err.message);
+        alert('خطأ: ' + err.message);
       } finally {
         btn.innerText = '💾 حفظ الحركة فوراً';
         btn.disabled = false;
@@ -133,8 +252,7 @@
     }
 
     async function loadData() {
-      if (!supabaseClient) return;
-
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
@@ -147,41 +265,69 @@
         .lte('entry_date', lastDay)
         .order('id', { ascending: false });
 
-      if (error) {
-        console.error('Error loading data:', error);
-        return;
-      }
+      if (error) return;
+
+      let mInc = 0, mExp = 0;
+      let tInc = 0, tExp = 0;
+      let todayHtml = '';
 
       if (data) {
-        let income = 0, expense = 0;
-        let todayHtml = '';
-        let todayCount = 0;
-
         data.forEach(item => {
-          const amt = Number(item.amount);
-          if (item.type === 'income') income += amt;
-          if (item.type === 'expense') expense += amt;
+          const amtUSD = Number(item.amount);
+          
+          // الشهر
+          if (item.type === 'income') mInc += amtUSD;
+          if (item.type === 'expense') mExp += amtUSD;
 
+          // اليوم
           if (item.entry_date === todayStr) {
-            todayCount++;
-            const colorClass = item.type === 'income' ? 'income' : 'expense';
+            if (item.type === 'income') tInc += amtUSD;
+            if (item.type === 'expense') tExp += amtUSD;
+
+            const color = item.type === 'income' ? 'income' : 'expense';
             const sign = item.type === 'income' ? '+' : '-';
-            todayHtml += `<div class="report-title"><span>📌 ${item.category} (${item.notes || 'بدون'})</span><span class="${colorClass}">${sign}${amt.toLocaleString()}</span></div>`;
+            const lbpValue = (amtUSD * rate).toLocaleString();
+            
+            todayHtml += `
+              <div class="report-item">
+                <div>
+                  <strong>📌 ${item.category}</strong>
+                  <div style="font-size:11px; color:#64748b;">${item.notes || ''}</div>
+                </div>
+                <div style="text-align:left;">
+                  <div class="${color}" style="font-weight:bold;">${sign}$${amtUSD.toFixed(2)}</div>
+                  <div style="font-size:10px; color:#94a3b8;">${sign}${lbpValue} LBP</div>
+                </div>
+              </div>`;
           }
         });
 
-        document.getElementById('total-income').innerText = income.toLocaleString();
-        document.getElementById('total-expense').innerText = expense.toLocaleString();
-        const net = income - expense;
-        const netElem = document.getElementById('net-profit');
-        netElem.innerText = net.toLocaleString();
-        netElem.style.color = net >= 0 ? '#10b981' : '#ef4444';
+        // تحديث أرقام اليوم
+        document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
+        document.getElementById('today-inc-lbp').innerText = (tInc * rate).toLocaleString() + ' LBP';
+        document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
+        document.getElementById('today-exp-lbp').innerText = (tExp * rate).toLocaleString() + ' LBP';
+        
+        const tNet = tInc - tExp;
+        const tNetElem = document.getElementById('today-net-usd');
+        tNetElem.innerText = '$' + tNet.toFixed(2);
+        tNetElem.className = 'stat-usd ' + (tNet >= 0 ? 'income' : 'expense');
+        document.getElementById('today-net-lbp').innerText = (tNet * rate).toLocaleString() + ' LBP';
 
-        if (todayCount === 0) {
-          document.getElementById('today-report').innerHTML = 'لا توجد حركات مسجلة لهذا اليوم حتى الآن.';
-        } else {
-          document.getElementById('today-report').innerHTML = todayHtml;
-        }
+        // تحديث أرقام الشهر
+        document.getElementById('month-inc-usd').innerText = '$' + mInc.toFixed(2);
+        document.getElementById('month-inc-lbp').innerText = (mInc * rate).toLocaleString() + ' LBP';
+        document.getElementById('month-exp-usd').innerText = '$' + mExp.toFixed(2);
+        document.getElementById('month-exp-lbp').innerText = (mExp * rate).toLocaleString() + ' LBP';
+
+        const mNet = mInc - mExp;
+        const mNetElem = document.getElementById('month-net-usd');
+        mNetElem.innerText = '$' + mNet.toFixed(2);
+        mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
+        document.getElementById('month-net-lbp').innerText = (mNet * rate).toLocaleString() + ' LBP';
+
+        // قائمة اليوم
+        document.getElementById('today-report').innerHTML = todayHtml || 'لا توجد حركات مسجلة اليوم حتى الآن.';
       }
     }
 
