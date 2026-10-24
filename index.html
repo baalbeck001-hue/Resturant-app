@@ -185,21 +185,17 @@
       gap: 6px;
     }
 
-    .btn-reset-day {
+    .btn-reset {
       width: 100%;
       padding: 10px;
       background: #fee2e2;
       color: #dc2626;
-      border: 1.5px solid #fca5a5;
+      border: 1px solid #fca5a5;
       border-radius: 10px;
-      font-weight: 800;
-      font-size: 12px;
+      font-weight: bold;
+      font-size: 13px;
       margin-top: 8px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
     }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
@@ -391,7 +387,7 @@
     </div>
 
     <button class="btn-wa" onclick="shareReportWhatsApp()">📲 إرسال هذا التقرير عبر واتساب</button>
-    <button class="btn-reset-day" onclick="resetTodayData()">🗑️ تصفير وحذف جميع حركات اليوم</button>
+    <button class="btn-reset" onclick="resetTodayEntries()">🗑️ تصفير وحذف جميع حركات اليوم</button>
   </div>
 
   <div class="floating-cart-bar" onclick="openModal()">
@@ -605,19 +601,257 @@
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
     }
 
-    // تصفير جميع حركات اليوم
-    async function resetTodayData() {
-      if (globalTodayData.length === 0) {
-        alert('الحسابات مصفّرة بالفعل ولا توجد حركات لليوم!');
-        return;
-      }
+    async function resetTodayEntries() {
+      if (confirm('هل أنت تأكد من حذف وتصفير جميع حركات اليوم؟ هذه الخطوة لا يمكن التراجع عنها!')) {
+        const idsToDelete = globalTodayData.map(item => item.id);
+        if (idsToDelete.length === 0) {
+          alert('لا توجد حركات اليوم لتصفيرها!');
+          return;
+        }
 
-      if (confirm('⚠️ هل أنت متأكد من حذف وتصفير جميع حركات التجربة لليوم؟')) {
-        const todayIds = globalTodayData.map(item => item.id);
         const { error } = await supabaseClient
           .from('restaurant_expenses')
           .delete()
-          .in('id', todayIds);
+          .in('id', idsToDelete);
 
         if (error) {
-          alert('
+          alert('خطأ بالتصفير: ' + error.message);
+        } else {
+          alert('تم تصفير حسابات اليوم بنجاح! ✅');
+          loadData();
+        }
+      }
+    }
+
+    async function saveOrder() {
+      if (cart.length === 0) {
+        alert('الرجاء اختيار وجبات أولاً!');
+        return;
+      }
+
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      let totalLBP = 0;
+      let detailsArr = [];
+
+      cart.forEach(item => {
+        totalLBP += (item.priceLBP * item.qty);
+        detailsArr.push(`${item.name} (x${item.qty})`);
+      });
+
+      const amountUSD = totalLBP / rate;
+      const detailsStr = `[${currentOrderType}] ${detailsArr.join('، ')} (${totalLBP.toLocaleString()} LBP)`;
+
+      const d = new Date();
+      const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      const btn = document.getElementById('save-order-btn');
+      btn.innerText = 'جاري الحفظ...';
+      btn.disabled = true;
+
+      try {
+        const { error } = await supabaseClient
+          .from('restaurant_expenses')
+          .insert([{ 
+            entry_date: todayFormatted, 
+            type: 'income', 
+            category: `طلب ${currentOrderType}`, 
+            amount: amountUSD, 
+            notes: detailsStr 
+          }]);
+
+        if (error) {
+          alert('خطأ بالحفظ: ' + error.message);
+        } else {
+          alert('تم حفظ الفاتورة بنجاح! ✅');
+          clearCart();
+          closeModal();
+          loadData();
+        }
+      } catch (err) {
+        alert('حدث خطأ: ' + err.message);
+      } finally {
+        btn.innerText = '✅ حفظ الفاتورة بالحسابات';
+        btn.disabled = false;
+      }
+    }
+
+    async function deleteEntry(id) {
+      if (confirm('هل أنت تأكد من حذف هذه الحركة؟')) {
+        const { error } = await supabaseClient
+          .from('restaurant_expenses')
+          .delete()
+          .eq('id', id);
+
+        if (error) {
+          alert('خطأ بالحذف: ' + error.message);
+        } else {
+          loadData();
+        }
+      }
+    }
+
+    async function saveExpense() {
+      const amountVal = parseFloat(document.getElementById('expense-amount').value);
+      const currency = document.getElementById('expense-currency').value;
+      const notes = document.getElementById('expense-notes').value || 'مصروف عام';
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+
+      if (!amountVal || amountVal <= 0) {
+        alert('الرجاء إدخال مبلغ صحيح!');
+        return;
+      }
+
+      let amountUSD = currency === 'USD' ? amountVal : (amountVal / rate);
+      const d = new Date();
+      const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      const { error } = await supabaseClient
+        .from('restaurant_expenses')
+        .insert([{ 
+          entry_date: todayFormatted, 
+          type: 'expense', 
+          category: 'مصاريف', 
+          amount: amountUSD, 
+          notes: `${notes} (${amountVal} ${currency})` 
+        }]);
+
+      if (error) {
+        alert('خطأ: ' + error.message);
+      } else {
+        alert('تم حفظ المصروف بنجاح! ✅');
+        document.getElementById('expense-amount').value = '';
+        document.getElementById('expense-notes').value = '';
+        loadData();
+      }
+    }
+
+    function filterReport(type) {
+      currentReportFilter = type;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`tab-${type}`).classList.add('active');
+      renderFilteredReport();
+    }
+
+    function renderFilteredReport() {
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      let todayHtml = '';
+
+      const filtered = globalTodayData.filter(item => {
+        if (currentReportFilter === 'all') return true;
+        if (currentReportFilter === 'sales') return item.type === 'income';
+        if (currentReportFilter === 'expenses') return item.type === 'expense';
+        if (currentReportFilter === 'sections') return item.type === 'income' && (item.category.includes('صالة') || item.category.includes('تيك أواي') || item.category.includes('دليفري'));
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        document.getElementById('today-report').innerHTML = 'لا توجد بيانات مسجلة اليوم.';
+        return;
+      }
+
+      filtered.forEach(item => {
+        const amtUSD = Number(item.amount);
+        const color = item.type === 'income' ? 'income' : 'expense';
+        const sign = item.type === 'income' ? '+' : '-';
+        const lbpValue = Math.round(amtUSD * rate).toLocaleString();
+        
+        todayHtml += `
+          <div class="report-item">
+            <div style="display:flex; align-items:center;">
+              <button class="btn-del" onclick="deleteEntry(${item.id})">🗑️</button>
+              <div>
+                <strong>📌 ${item.category}</strong>
+                <div style="font-size:10px; color:#64748b;">${item.notes || ''}</div>
+              </div>
+            </div>
+            <div style="text-align:left;">
+              <div class="${color}" style="font-weight:bold;">${sign}$${amtUSD.toFixed(2)}</div>
+              <div style="font-size:9px; color:#94a3b8;">${sign}${lbpValue} LBP</div>
+            </div>
+          </div>`;
+      });
+
+      document.getElementById('today-report').innerHTML = todayHtml;
+    }
+
+    async function loadData() {
+      const rateElem = document.getElementById('exchange-rate');
+      const rate = rateElem ? (parseFloat(rateElem.value) || 90000) : 90000;
+      
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      const { data, error } = await supabaseClient
+        .from('restaurant_expenses')
+        .select('*')
+        .gte('entry_date', firstDay)
+        .lte('entry_date', lastDay)
+        .order('id', { ascending: false });
+
+      if (error) {
+        document.getElementById('today-report').innerHTML = 'خطأ بالتثبيت: ' + error.message;
+        return;
+      }
+
+      let mInc = 0, mExp = 0;
+      let tInc = 0, tExp = 0;
+      let hallTotal = 0, takeawayTotal = 0, deliveryTotal = 0;
+      globalTodayData = [];
+
+      if (data) {
+        data.forEach(item => {
+          const amtUSD = Number(item.amount);
+          
+          if (item.type === 'income') mInc += amtUSD;
+          if (item.type === 'expense') mExp += amtUSD;
+
+          if (item.entry_date === todayStr) {
+            globalTodayData.push(item);
+
+            if (item.type === 'income') {
+              tInc += amtUSD;
+              if (item.category.includes('داخل المطعم')) hallTotal += (amtUSD * rate);
+              else if (item.category.includes('تيك أواي')) takeawayTotal += (amtUSD * rate);
+              else if (item.category.includes('دليفري')) deliveryTotal += (amtUSD * rate);
+            }
+            if (item.type === 'expense') tExp += amtUSD;
+          }
+        });
+
+        document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
+        document.getElementById('today-inc-lbp').innerText = Math.round(tInc * rate).toLocaleString() + ' LBP';
+        document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
+        document.getElementById('today-exp-lbp').innerText = Math.round(tExp * rate).toLocaleString() + ' LBP';
+        
+        document.getElementById('type-hall-total').innerText = Math.round(hallTotal).toLocaleString() + ' LBP';
+        document.getElementById('type-takeaway-total').innerText = Math.round(takeawayTotal).toLocaleString() + ' LBP';
+        document.getElementById('type-delivery-total').innerText = Math.round(deliveryTotal).toLocaleString() + ' LBP';
+
+        const tNet = tInc - tExp;
+        const tNetElem = document.getElementById('today-net-usd');
+        tNetElem.innerText = '$' + tNet.toFixed(2);
+        tNetElem.className = 'stat-usd ' + (tNet >= 0 ? 'income' : 'expense');
+        document.getElementById('today-net-lbp').innerText = Math.round(tNet * rate).toLocaleString() + ' LBP';
+
+        document.getElementById('month-inc-usd').innerText = '$' + mInc.toFixed(2);
+        document.getElementById('month-inc-lbp').innerText = Math.round(mInc * rate).toLocaleString() + ' LBP';
+        document.getElementById('month-exp-usd').innerText = '$' + mExp.toFixed(2);
+        document.getElementById('month-exp-lbp').innerText = Math.round(mExp * rate).toLocaleString() + ' LBP';
+
+        const mNet = mInc - mExp;
+        const mNetElem = document.getElementById('month-net-usd');
+        mNetElem.innerText = '$' + mNet.toFixed(2);
+        mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
+        document.getElementById('month-net-lbp').innerText = Math.round(mNet * rate).toLocaleString() + ' LBP';
+
+        renderFilteredReport();
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
