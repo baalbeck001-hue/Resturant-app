@@ -6,18 +6,21 @@
   <title>حسابات المطعم</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --primary: #10b981; --danger: #ef4444; --bg: #f3f4f6; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; direction: rtl; }
-    .card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 15px; }
-    h2, h3 { margin-top: 0; color: #1f2937; text-align: center; }
-    label { font-size: 14px; color: #4b5563; font-weight: bold; margin-top: 8px; display: block; }
-    input, select { width: 100%; padding: 12px; margin-top: 4px; border: 1px solid #d1d5db; border-radius: 10px; box-sizing: border-box; font-size: 16px; background: #fff; }
-    button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 15px; cursor: pointer; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat { text-align: center; padding: 10px; border-radius: 10px; background: #f9fafb; }
-    .stat-val { font-size: 18px; font-weight: bold; margin-top: 4px; }
+    :root { --primary: #10b981; --danger: #ef4444; --bg: #f3f4f6; --primary-dark: #059669; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 12px; direction: rtl; color: #1f2937; }
+    .card { background: white; padding: 14px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 12px; }
+    h2, h3 { margin: 0 0 10px 0; color: #1f2937; text-align: center; font-size: 18px; }
+    label { font-size: 13px; color: #4b5563; font-weight: bold; margin-top: 6px; display: block; }
+    input, select { width: 100%; padding: 10px; margin-top: 3px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 15px; background: #fff; }
+    .btn-save { width: 100%; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3); }
+    .btn-save:active { background: var(--primary-dark); transform: scale(0.98); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .stat { text-align: center; padding: 10px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; }
+    .stat-val { font-size: 16px; font-weight: bold; margin-top: 2px; }
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
+    .report-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 14px; }
+    .report-title { font-weight: bold; color: #1e40af; margin-bottom: 4px; display: flex; justify-content: space-between; }
   </style>
 </head>
 <body>
@@ -43,31 +46,37 @@
       <option value="أخرى">أخرى</option>
     </select>
 
-    <label>المبلغ</label>
-    <input type="number" id="amount" placeholder="0.00">
+    <label>المبلغ ($ أو العملة)</label>
+    <input type="number" id="amount" placeholder="0">
 
     <label>ملاحظات</label>
     <input type="text" id="notes" placeholder="مثال: فاتورة لحمة...">
 
-    <button onclick="saveEntry()">حفظ في الحسابات</button>
+    <button class="btn-save" onclick="saveEntry()">💾 حفظ الحركة فوراً</button>
   </div>
 
   <div class="card">
-    <h3>ملخص الشهر الحالي</h3>
+    <h3>📊 ملخص الشهر الحالي</h3>
     <div class="grid">
       <div class="stat">
-        <div>المبيعات</div>
+        <div>إجمالي المبيعات</div>
         <div id="total-income" class="stat-val income">0</div>
       </div>
       <div class="stat">
-        <div>المصاريف</div>
+        <div>إجمالي المصاريف</div>
         <div id="total-expense" class="stat-val expense">0</div>
       </div>
     </div>
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-    <div class="stat">
-      <div>صافي الربح / الخسارة</div>
-      <div id="net-profit" class="stat-val">0</div>
+    <div class="stat" style="margin-top: 8px; background: #ecfdf5;">
+      <div>صافي الربح الشهري</div>
+      <div id="net-profit" class="stat-val" style="font-size: 18px;">0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔍 تقرير اليوم (آخر الحركات)</h3>
+    <div id="today-report" class="report-box">
+      جاري تحميل الحركات...
     </div>
   </div>
 
@@ -83,40 +92,67 @@
       const type = document.getElementById('type').value;
       const category = document.getElementById('category').value;
       const amount = parseFloat(document.getElementById('amount').value);
-      const notes = document.getElementById('notes').value;
+      const notes = document.getElementById('notes').value || '';
 
-      if (!amount) return alert('الرجاء أدخل المبلغ');
+      if (!amount || isNaN(amount)) {
+        alert('الرجاء إدخال المبلغ بشكل صحيح!');
+        return;
+      }
 
-      const { data, error } = await supabase
+      const btn = document.querySelector('.btn-save');
+      btn.innerText = 'جاري الحفظ...';
+
+      const { error } = await supabase
         .from('restaurant_expenses')
         .insert([{ entry_date, type, category, amount, notes }]);
 
+      btn.innerText = '💾 حفظ الحركة فوراً';
+
       if (error) {
-        alert('حدث خطأ أثناء الحفظ: ' + error.message);
+        alert('خطأ بالحفظ: ' + error.message);
       } else {
-        alert('تم الحفظ بنجاح!');
+        alert('تم الحفظ بنجاح! ✅');
         document.getElementById('amount').value = '';
         document.getElementById('notes').value = '';
-        loadSummary();
+        loadData();
       }
     }
 
-    async function loadSummary() {
+    async function loadData() {
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      const todayStr = now.toISOString().split('T')[0];
 
       const { data, error } = await supabase
         .from('restaurant_expenses')
         .select('*')
         .gte('entry_date', firstDay)
-        .lte('entry_date', lastDay);
+        .lte('entry_date', lastDay)
+        .order('id', { ascending: false });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
 
       if (data) {
         let income = 0, expense = 0;
+        let todayHtml = '';
+        let todayCount = 0;
+
         data.forEach(item => {
-          if (item.type === 'income') income += Number(item.amount);
-          if (item.type === 'expense') expense += Number(item.amount);
+          const amt = Number(item.amount);
+          if (item.type === 'income') income += amt;
+          if (item.type === 'expense') expense += amt;
+
+          // حركات اليوم فقط لتقرير اليوم
+          if (item.entry_date === todayStr) {
+            todayCount++;
+            const colorClass = item.type === 'income' ? 'income' : 'expense';
+            const sign = item.type === 'income' ? '+' : '-';
+            todayHtml += `<div class="report-title"><span>📌 ${item.category} (${item.notes || 'بدون'})</span><span class="${colorClass}">${sign}${amt.toLocaleString()}</span></div>`;
+          }
         });
 
         document.getElementById('total-income').innerText = income.toLocaleString();
@@ -125,10 +161,16 @@
         const netElem = document.getElementById('net-profit');
         netElem.innerText = net.toLocaleString();
         netElem.style.color = net >= 0 ? '#10b981' : '#ef4444';
+
+        if (todayCount === 0) {
+          document.getElementById('today-report').innerHTML = 'لا توجد حركات مسجلة لهذا اليوم حتى الآن.';
+        } else {
+          document.getElementById('today-report').innerHTML = todayHtml;
+        }
       }
     }
 
-    loadSummary();
+    loadData();
   </script>
 </body>
 </html>
