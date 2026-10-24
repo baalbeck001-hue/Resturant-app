@@ -67,7 +67,6 @@
       border: 2px solid white;
     }
 
-    /* البار العائم السريع بالأسفل */
     .floating-cart-bar {
       position: fixed;
       bottom: 12px;
@@ -170,13 +169,11 @@
 
   <div class="header">🍽️ إدارة طلبات وحسابات المطعم</div>
 
-  <!-- سعر الصرف -->
   <div class="rate-box">
     <span>سعر الصرف ($1 = LBP):</span>
     <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
-  <!-- لوحة المنيو السريع -->
   <div class="card">
     <h3 style="color: #047857;">⚡ اختر الوجبات للفاتورة</h3>
     <div class="menu-grid">
@@ -248,7 +245,6 @@
     </div>
   </div>
 
-  <!-- تسجيل مصروف يدوي -->
   <div class="card">
     <h3>💸 تسجيل مصروف (مشتريات/فواتير)</h3>
     <div class="row" style="display:flex; gap:6px;">
@@ -269,7 +265,6 @@
     <button onclick="saveExpense()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; margin-top:8px; cursor:pointer;">💾 حفظ المصروف</button>
   </div>
 
-  <!-- ملخص اليوم -->
   <div class="card">
     <h3>☀️ ملخص اليوم</h3>
     <div class="grid">
@@ -291,7 +286,6 @@
     </div>
   </div>
 
-  <!-- ملخص الشهر -->
   <div class="card">
     <h3>📅 ملخص الشهر الحالي</h3>
     <div class="grid">
@@ -313,7 +307,6 @@
     </div>
   </div>
 
-  <!-- تفاصيل حركات اليوم -->
   <div class="card">
     <h3>🔍 حركات اليوم التفصيلية</h3>
     <div id="today-report" class="report-box">
@@ -321,7 +314,6 @@
     </div>
   </div>
 
-  <!-- الزر العائم لفتح الفاتورة -->
   <div class="floating-cart-bar" onclick="openModal()">
     <div style="display:flex; align-items:center; gap:8px;">
       <span style="font-size:18px;">🛒</span>
@@ -330,7 +322,6 @@
     <div id="float-total-lbp" style="font-size:16px;">0 LBP</div>
   </div>
 
-  <!-- نافذة POPUP الفاتورة -->
   <div class="modal-overlay" id="cart-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
