@@ -19,6 +19,7 @@
       background: var(--bg);
       margin: 0;
       padding: 10px;
+      padding-bottom: 90px; /* مساحة للزر العائم بالأسفل */
       direction: rtl;
       color: var(--text);
     }
@@ -29,23 +30,99 @@
     input, select { width: 100%; padding: 10px; margin-top: 3px; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #f8fafc; font-weight: 600; }
     
     /* شبكة كبسات المنيو */
-    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
     .menu-btn {
+      position: relative;
       background: #f0fdf4;
-      border: 1.5px solid #10b981;
-      padding: 10px 8px;
-      border-radius: 10px;
+      border: 2px solid #10b981;
+      padding: 12px 8px;
+      border-radius: 12px;
       text-align: right;
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s ease, background-color 0.1s ease;
     }
-    .menu-btn:active { background: #bbf7d0; transform: scale(0.96); }
-    .menu-name { font-weight: bold; font-size: 13px; color: #166534; }
+    .menu-btn:active {
+      background: #bbf7d0;
+      transform: scale(0.93);
+    }
+    .menu-name { font-weight: bold; font-size: 14px; color: #166534; }
     .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; }
+    
+    /* شارة العدّاد على الزر نفسه */
+    .badge {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      background: #ef4444;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+      border: 2px solid white;
+      display: none;
+    }
+
+    /* الزر العائم لفتح الفاتورة بالأسفل */
+    .floating-cart-bar {
+      position: fixed;
+      bottom: 15px;
+      left: 12px;
+      right: 12px;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: white;
+      padding: 14px 18px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+      cursor: pointer;
+      z-index: 100;
+      font-weight: 800;
+      display: none;
+    }
+
+    /* الـ Popup Modal للفاتورة */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 15px;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: white;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      max-height: 85vh;
+      overflow-y: auto;
+      direction: rtl;
+    }
 
     /* أزرار نوع الطلب (صالة / دليفري / سفري) */
-    .order-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+    .order-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; }
     .type-btn {
       padding: 10px 4px;
       border: 2px solid #cbd5e1;
@@ -63,23 +140,21 @@
       color: #1d4ed8;
     }
 
-    /* الفاتورة الحالية (السلة) */
-    .cart-box { background: #fff8f1; border: 2px dashed #f97316; padding: 10px; border-radius: 12px; margin-top: 8px; }
+    .cart-box { background: #fff8f1; border: 1.5px dashed #f97316; padding: 10px; border-radius: 12px; margin-top: 8px; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fed7aa; padding: 6px 0; font-size: 13px; }
-    .cart-total { text-align: center; margin-top: 8px; padding-top: 8px; border-top: 2px solid #f97316; font-weight: bold; }
+    .cart-item:last-child { border-bottom: none; }
 
     .btn-save {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: 800;
       font-size: 16px;
-      margin-top: 10px;
+      margin-top: 12px;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
     }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
@@ -91,7 +166,7 @@
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
 
-    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 200px; overflow-y: auto; }
+    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 180px; overflow-y: auto; }
     .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 6px 0; font-size: 12px; }
     .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: bold; color: #78350f; }
     .rate-box input { width: 90px; padding: 3px 6px; font-size: 12px; text-align: center; margin: 0; }
@@ -107,96 +182,81 @@
     <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
-  <!-- اختيار نوع الطلب -->
-  <div class="card">
-    <h3>📍 قسم / نوع الطلب</h3>
-    <div class="order-type-grid">
-      <div class="type-btn active" id="type-hall" onclick="setOrderType('داخل المطعم')">🏠 صالة</div>
-      <div class="type-btn" id="type-takeaway" onclick="setOrderType('تيك أواي')">🛍️ سفري</div>
-      <div class="type-btn" id="type-delivery" onclick="setOrderType('دليفري')">🛵 دليفري</div>
-    </div>
-  </div>
-
   <!-- لوحة المنيو السريع -->
   <div class="card">
     <h3 style="color: #047857;">⚡ اختر الوجبات للفاتورة</h3>
     <div class="menu-grid">
-      <div class="menu-btn" onclick="addToCart('فول', 40000)">
+      <div class="menu-btn" id="btn-فول" onclick="addToCart('فول', 40000)">
+        <div class="badge" id="badge-فول">0</div>
         <div class="menu-name">فول</div>
         <div class="menu-price">40,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('بليلة', 40000)">
+      <div class="menu-btn" id="btn-بليلة" onclick="addToCart('بليلة', 40000)">
+        <div class="badge" id="badge-بليلة">0</div>
         <div class="menu-name">بليلة</div>
         <div class="menu-price">40,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('مسبحة', 40000)">
+      <div class="menu-btn" id="btn-مسبحة" onclick="addToCart('مسبحة', 40000)">
+        <div class="badge" id="badge-مسبحة">0</div>
         <div class="menu-name">مسبحة</div>
         <div class="menu-price">40,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('حمص مطحون', 40000)">
+      <div class="menu-btn" id="btn-حمص مطحون" onclick="addToCart('حمص مطحون', 40000)">
+        <div class="badge" id="badge-حمص مطحون">0</div>
         <div class="menu-name">حمص مطحون</div>
         <div class="menu-price">40,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('فتة', 45000)">
+      <div class="menu-btn" id="btn-فتة" onclick="addToCart('فتة', 45000)">
+        <div class="badge" id="badge-فتة">0</div>
         <div class="menu-name">فتة</div>
         <div class="menu-price">45,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('فتة اكسترا', 55000)">
+      <div class="menu-btn" id="btn-فتة اكسترا" onclick="addToCart('فتة اكسترا', 55000)">
+        <div class="badge" id="badge-فتة اكسترا">0</div>
         <div class="menu-name">فتة اكسترا</div>
         <div class="menu-price">55,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('فتة لسانات', 70000)">
+      <div class="menu-btn" id="btn-فتة لسانات" onclick="addToCart('فتة لسانات', 70000)">
+        <div class="badge" id="badge-فتة لسانات">0</div>
         <div class="menu-name">فتة لسانات</div>
         <div class="menu-price">70,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('فتة مقادم', 70000)">
+      <div class="menu-btn" id="btn-فتة مقادم" onclick="addToCart('فتة مقادم', 70000)">
+        <div class="badge" id="badge-فتة مقادم">0</div>
         <div class="menu-name">فتة مقادم</div>
         <div class="menu-price">70,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('فتة عصب', 70000)">
+      <div class="menu-btn" id="btn-فتة عصب" onclick="addToCart('فتة عصب', 70000)">
+        <div class="badge" id="badge-فتة عصب">0</div>
         <div class="menu-name">فتة عصب</div>
         <div class="menu-price">70,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('بيض مع قوارما', 60000)">
+      <div class="menu-btn" id="btn-بيض مع قوارما" onclick="addToCart('بيض مع قوارما', 60000)">
+        <div class="badge" id="badge-بيض مع قوارما">0</div>
         <div class="menu-name">بيض مع قوارما</div>
         <div class="menu-price">60,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('حمص بلحمة', 60000)">
+      <div class="menu-btn" id="btn-حمص بلحمة" onclick="addToCart('حمص بلحمة', 60000)">
+        <div class="badge" id="badge-حمص بلحمة">0</div>
         <div class="menu-name">حمص بلحمة</div>
         <div class="menu-price">60,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('فتة لحمة', 65000)">
+      <div class="menu-btn" id="btn-فتة لحمة" onclick="addToCart('فتة لحمة', 65000)">
+        <div class="badge" id="badge-فتة لحمة">0</div>
         <div class="menu-name">فتة لحمة</div>
         <div class="menu-price">65,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('مرطبات', 15000)">
+      <div class="menu-btn" id="btn-مرطبات" onclick="addToCart('مرطبات', 15000)">
+        <div class="badge" id="badge-مرطبات">0</div>
         <div class="menu-name">مرطبات</div>
         <div class="menu-price">15,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="addToCart('مياه', 10000)">
+      <div class="menu-btn" id="btn-مياه" onclick="addToCart('مياه', 10000)">
+        <div class="badge" id="badge-مياه">0</div>
         <div class="menu-name">مياه</div>
         <div class="menu-price">10,000 LBP</div>
       </div>
     </div>
-  </div>
-
-  <!-- الفاتورة الحالية (السلة) -->
-  <div class="card" style="border: 2px solid #ea580c;">
-    <h3 style="color: #c2410c; justify-content: space-between;">
-      <span>🧾 الفاتورة الحالية</span>
-      <button onclick="clearCart()" style="background:#fee2e2; color:#dc2626; border:none; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">إلغاء الكل</button>
-    </h3>
-    
-    <div id="cart-items" class="cart-box">
-      لا توجد وجبات مضافة بالفاتورة حتى الآن.
-    </div>
-
-    <div class="cart-total" id="cart-total-box" style="display:none;">
-      <div>المجموع: <span id="cart-total-lbp" style="color:#ea580c; font-size:16px;">0 LBP</span></div>
-      <div style="font-size:12px; color:#64748b;">ما يعادل: <span id="cart-total-usd">$0.00</span></div>
-    </div>
-
-    <button class="btn-save" id="save-order-btn" onclick="saveOrder()" style="display:none;">✅ تسجيل الفاتورة في الحسابات</button>
   </div>
 
   <!-- تسجيل مصروف يدوي -->
@@ -216,7 +276,7 @@
       </div>
     </div>
     <label>تفاصيل المصروف</label>
-    <input type="text" id="expense-notes" placeholder="مثال: فاتورة لحمة، غاز، خضار...">
+    <input type="text" id="expense-notes" placeholder="مثال: فاتورة لحمة، غاز...">
     <button onclick="saveExpense()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; margin-top:8px; cursor:pointer;">💾 حفظ المصروف</button>
   </div>
 
@@ -266,9 +326,50 @@
 
   <!-- تفاصيل حركات اليوم -->
   <div class="card">
-    <h3>🔍 حركات وطلبات اليوم التفصيلية</h3>
+    <h3>🔍 حركات اليوم التفصيلية</h3>
     <div id="today-report" class="report-box">
       جاري التحميل...
+    </div>
+  </div>
+
+  <!-- الزر العائم لفتح الفاتورة -->
+  <div class="floating-cart-bar" id="floating-cart-btn" onclick="openModal()">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:18px;">🛒</span>
+      <span>عرض الفاتورة (<span id="float-count">0</span> أصناف)</span>
+    </div>
+    <div id="float-total-lbp" style="font-size:16px;">0 LBP</div>
+  </div>
+
+  <!-- نافذة POPUP الفاتورة -->
+  <div class="modal-overlay" id="cart-modal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="margin:0; font-size:16px; color:#ea580c;">🧾 مراجعة الفاتورة</h3>
+        <button onclick="closeModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
+      </div>
+
+      <!-- قسم نوع الطلب -->
+      <label>نوع الطلب:</label>
+      <div class="order-type-grid">
+        <div class="type-btn active" id="type-hall" onclick="setOrderType('داخل المطعم')">🏠 صالة</div>
+        <div class="type-btn" id="type-takeaway" onclick="setOrderType('تيك أواي')">🛍️ سفري</div>
+        <div class="type-btn" id="type-delivery" onclick="setOrderType('دليفري')">🛵 دليفري</div>
+      </div>
+
+      <!-- الأصناف المضافة -->
+      <div id="cart-items" class="cart-box">
+        لا توجد وجبات بالفاتورة.
+      </div>
+
+      <!-- مجموع الفاتورة -->
+      <div style="text-align:center; margin-top:12px; font-weight:bold;">
+        <div style="font-size:18px; color:#ea580c;" id="modal-total-lbp">0 LBP</div>
+        <div style="font-size:12px; color:#64748b;" id="modal-total-usd">ما يعادل: $0.00</div>
+      </div>
+
+      <button class="btn-save" id="save-order-btn" onclick="saveOrder()">✅ حفظ الفاتورة بالحسابات</button>
+      <button onclick="clearCart(); closeModal();" style="width:100%; background:none; border:none; color:#dc2626; font-size:12px; font-weight:bold; margin-top:8px; cursor:pointer;">إلغاء وإفرغ الفاتورة</button>
     </div>
   </div>
 
@@ -280,7 +381,6 @@
     let currentOrderType = 'داخل المطعم';
     let cart = [];
 
-    // تغيير نوع الطلب
     function setOrderType(type) {
       currentOrderType = type;
       document.getElementById('type-hall').className = 'type-btn' + (type === 'داخل المطعم' ? ' active' : '');
@@ -288,7 +388,6 @@
       document.getElementById('type-delivery').className = 'type-btn' + (type === 'دليفري' ? ' active' : '');
     }
 
-    // إضافة وجبة للسلة
     function addToCart(name, priceLBP) {
       const existing = cart.find(item => item.name === name);
       if (existing) {
@@ -299,7 +398,6 @@
       renderCart();
     }
 
-    // تقليل أو حذف وجبة
     function removeFromCart(name) {
       const index = cart.findIndex(item => item.name === name);
       if (index !== -1) {
@@ -312,55 +410,78 @@
       renderCart();
     }
 
-    // تفريغ السلة
     function clearCart() {
       cart = [];
       renderCart();
     }
 
-    // عرض الفاتورة الحالية
     function renderCart() {
-      const container = document.getElementById('cart-items');
-      const totalBox = document.getElementById('cart-total-box');
-      const saveBtn = document.getElementById('save-order-btn');
+      // 1. تحديث الـ Badges فوق كل كبسة بالمنيو
+      const allBadges = document.querySelectorAll('.badge');
+      allBadges.forEach(b => {
+        b.innerText = '0';
+        b.style.display = 'none';
+      });
 
-      if (cart.length === 0) {
-        container.innerHTML = 'لا توجد وجبات مضافة بالفاتورة حتى الآن.';
-        totalBox.style.display = 'none';
-        saveBtn.style.display = 'none';
-        return;
-      }
-
-      let html = '';
+      let totalItemsCount = 0;
       let totalLBP = 0;
 
       cart.forEach(item => {
-        const itemTotal = item.priceLBP * item.qty;
-        totalLBP += itemTotal;
-        html += `
-          <div class="cart-item">
-            <div>
-              <strong>${item.name}</strong> (x${item.qty})
-            </div>
-            <div>
-              <span style="font-weight:bold; color:#ea580c; margin-left:8px;">${itemTotal.toLocaleString()} LBP</span>
-              <button onclick="removeFromCart('${item.name}')" style="background:#fee2e2; color:#dc2626; border:none; border-radius:4px; padding:2px 6px; font-weight:bold;">-</button>
-            </div>
-          </div>`;
+        totalItemsCount += item.qty;
+        totalLBP += (item.priceLBP * item.qty);
+
+        const badgeElem = document.getElementById(`badge-${item.name}`);
+        if (badgeElem) {
+          badgeElem.innerText = item.qty;
+          badgeElem.style.display = 'flex';
+        }
       });
 
-      container.innerHTML = html;
-      totalBox.style.display = 'block';
-      saveBtn.style.display = 'block';
+      // 2. تحديث الزر العائم بالأسفل
+      const floatBtn = document.getElementById('floating-cart-btn');
+      if (totalItemsCount > 0) {
+        floatBtn.style.display = 'flex';
+        document.getElementById('float-count').innerText = totalItemsCount;
+        document.getElementById('float-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
+      } else {
+        floatBtn.style.display = 'none';
+      }
+
+      // 3. تحديث محتوى الـ Modal
+      const container = document.getElementById('cart-items');
+      if (cart.length === 0) {
+        container.innerHTML = 'لا توجد وجبات مضافة بالفاتورة.';
+      } else {
+        let html = '';
+        cart.forEach(item => {
+          const itemTotal = item.priceLBP * item.qty;
+          html += `
+            <div class="cart-item">
+              <div><strong>${item.name}</strong> (x${item.qty})</div>
+              <div>
+                <span style="font-weight:bold; color:#ea580c; margin-left:8px;">${itemTotal.toLocaleString()} LBP</span>
+                <button onclick="removeFromCart('${item.name}')" style="background:#fee2e2; color:#dc2626; border:none; border-radius:4px; padding:2px 6px; font-weight:bold; cursor:pointer;">-</button>
+              </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+      }
 
       const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
       const totalUSD = totalLBP / rate;
 
-      document.getElementById('cart-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
-      document.getElementById('cart-total-usd').innerText = '$' + totalUSD.toFixed(2);
+      document.getElementById('modal-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
+      document.getElementById('modal-total-usd').innerText = 'ما يعادل: $' + totalUSD.toFixed(2);
     }
 
-    // حفظ الفاتورة الكاملة بطلب واحد
+    function openModal() {
+      document.getElementById('cart-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('cart-modal').classList.remove('active');
+    }
+
     async function saveOrder() {
       if (cart.length === 0) return;
 
@@ -399,17 +520,17 @@
         } else {
           alert('تم حفظ الفاتورة بنجاح! ✅');
           clearCart();
+          closeModal();
           loadData();
         }
       } catch (err) {
         alert('حدث خطأ: ' + err.message);
       } finally {
-        btn.innerText = '✅ تسجيل الفاتورة في الحسابات';
+        btn.innerText = '✅ حفظ الفاتورة بالحسابات';
         btn.disabled = false;
       }
     }
 
-    // حفظ مصروف يدوي
     async function saveExpense() {
       const amountVal = parseFloat(document.getElementById('expense-amount').value);
       const currency = document.getElementById('expense-currency').value;
@@ -497,7 +618,6 @@
           }
         });
 
-        // تحديث المبالغ
         document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
         document.getElementById('today-inc-lbp').innerText = Math.round(tInc * rate).toLocaleString() + ' LBP';
         document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
