@@ -1,118 +1,201 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>حسابات المطعم السريعة</title>
+  <title>Restaurant POS & Accounting</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #10b981;
       --primary-dark: #059669;
       --danger: #ef4444;
-      --bg: #f1f5f9;
+      --warning: #f59e0b;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
       --text: #0f172a;
+      --subtext: #64748b;
+      --border: #e2e8f0;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
       margin: 0;
-      padding: 12px;
-      padding-bottom: 110px;
-      direction: rtl;
+      padding: 14px;
+      padding-bottom: 120px;
       color: var(--text);
     }
-    .header { text-align: center; padding: 6px 0; font-weight: 900; font-size: 20px; color: #0f172a; }
-    .card { background: var(--card-bg); padding: 14px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); margin-bottom: 12px; border: 1px solid #e2e8f0; }
-    h3 { margin: 0 0 10px 0; color: #1e293b; font-size: 15px; display: flex; align-items: center; gap: 6px; font-weight: 800; }
-    label { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 6px; display: block; }
-    input, select { width: 100%; padding: 10px 12px; margin-top: 4px; border: 1.5px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-size: 14px; background: #f8fafc; font-weight: 600; outline: none; }
-    input:focus { border-color: var(--primary); background: #fff; }
+    .header {
+      text-align: center;
+      padding: 8px 0 14px;
+      font-weight: 900;
+      font-size: 22px;
+      color: #1e293b;
+      letter-spacing: -0.5px;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    h3 {
+      margin: 0 0 12px 0;
+      color: #1e293b;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+    label {
+      font-size: 11px;
+      color: var(--subtext);
+      font-weight: 700;
+      margin-top: 8px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      margin-top: 4px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
     
-    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+    /* Menu Quick Grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
     .menu-btn {
       position: relative;
       background: #f0fdf4;
       border: 2px solid #bbf7d0;
-      padding: 12px 10px;
-      border-radius: 14px;
-      text-align: right;
+      padding: 14px 12px;
+      border-radius: 16px;
+      text-align: left;
       cursor: pointer;
       user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: all 0.15s ease;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .menu-btn:active { background: #86efac; transform: scale(0.95); }
-    .menu-name { font-weight: 800; font-size: 14px; color: #14532d; }
-    .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; font-weight: 700; }
+    .menu-btn:active {
+      background: #86efac;
+      transform: scale(0.96);
+    }
+    .menu-name {
+      font-weight: 800;
+      font-size: 15px;
+      color: #14532d;
+    }
+    .menu-price {
+      font-size: 12px;
+      color: #16a34a;
+      margin-top: 4px;
+      font-weight: 700;
+    }
     
     .badge {
       position: absolute;
-      top: -6px;
-      left: -6px;
-      background: #ef4444;
+      top: -8px;
+      right: -8px;
+      background: var(--danger);
       color: white;
       font-size: 11px;
       font-weight: 900;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       display: none;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 3px 8px rgba(239, 68, 68, 0.4);
       border: 2px solid white;
     }
 
+    /* Expenses Quick Buttons */
     .expense-quick-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-top: 8px;
       margin-bottom: 8px;
-      max-height: 130px;
+      max-height: 140px;
       overflow-y: auto;
-      padding: 6px;
+      padding: 8px;
       background: #f8fafc;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      direction: rtl;
     }
     .exp-btn {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 12px;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 13px;
       font-weight: 700;
       color: #334155;
       cursor: pointer;
+      transition: all 0.15s ease;
     }
-    .exp-btn:active { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
+    .exp-btn:active {
+      background: #fee2e2;
+      border-color: var(--danger);
+      color: #dc2626;
+      transform: scale(0.95);
+    }
 
     .floating-cart-bar {
       position: fixed;
-      bottom: 12px;
-      left: 12px;
-      right: 12px;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
       background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
       color: white;
-      padding: 14px 18px;
-      border-radius: 18px;
+      padding: 16px 20px;
+      border-radius: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 10px 25px rgba(249, 115, 22, 0.4);
+      box-shadow: 0 12px 28px rgba(249, 115, 22, 0.35);
       cursor: pointer;
       z-index: 1000;
       font-weight: 800;
+      transition: transform 0.2s ease;
+    }
+    .floating-cart-bar:active {
+      transform: scale(0.98);
     }
 
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(6px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -120,158 +203,263 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease;
-      padding: 15px;
+      padding: 16px;
     }
-    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
     .modal-card {
       background: white;
       width: 100%;
-      max-width: 400px;
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      max-width: 420px;
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.25);
       max-height: 85vh;
       overflow-y: auto;
-      direction: rtl;
     }
 
-    .order-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .order-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
     .type-btn {
-      padding: 10px 4px;
-      border: 2px solid #e2e8f0;
+      padding: 12px 6px;
+      border: 2px solid var(--border);
       background: #f8fafc;
-      border-radius: 12px;
+      border-radius: 14px;
       text-align: center;
       font-weight: 800;
       font-size: 12px;
       cursor: pointer;
-      color: #64748b;
+      color: var(--subtext);
+      transition: all 0.15s ease;
     }
-    .type-btn.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+    .type-btn.active {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
 
-    .report-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-top: 8px; margin-bottom: 8px; }
+    .report-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
     .tab-btn {
-      padding: 8px 2px;
-      border: 1.5px solid #e2e8f0;
+      padding: 9px 4px;
+      border: 1.5px solid var(--border);
       background: #f8fafc;
-      border-radius: 10px;
+      border-radius: 12px;
       text-align: center;
       font-weight: 700;
       font-size: 11px;
       cursor: pointer;
-      color: #64748b;
+      color: var(--subtext);
+      transition: all 0.15s ease;
     }
-    .tab-btn.active { border-color: #10b981; background: #ecfdf5; color: #047857; }
+    .tab-btn.active {
+      border-color: var(--primary);
+      background: #ecfdf5;
+      color: #047857;
+    }
 
-    .cart-box { background: #fff8f1; border: 1.5px dashed #f97316; padding: 10px; border-radius: 12px; margin-top: 8px; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fed7aa; padding: 6px 0; font-size: 13px; }
-    .cart-item:last-child { border-bottom: none; }
+    .cart-box {
+      background: #fff8f1;
+      border: 1.5px dashed #f97316;
+      padding: 12px;
+      border-radius: 14px;
+      margin-top: 10px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #fed7aa;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+    .cart-item:last-child {
+      border-bottom: none;
+    }
 
     .btn-save {
       width: 100%;
-      padding: 14px;
+      padding: 15px;
       background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       font-weight: 800;
       font-size: 15px;
-      margin-top: 10px;
+      margin-top: 12px;
       cursor: pointer;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
     .btn-wa {
       width: 100%;
-      padding: 12px;
+      padding: 13px;
       background: #25d366;
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       font-weight: 800;
       font-size: 14px;
-      margin-top: 8px;
+      margin-top: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .btn-reset {
       width: 100%;
-      padding: 10px;
+      padding: 11px;
       background: #fee2e2;
       color: #dc2626;
       border: 1px solid #fca5a5;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: bold;
       font-size: 12px;
-      margin-top: 8px;
+      margin-top: 10px;
       cursor: pointer;
     }
 
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
-    .stat { text-align: center; padding: 12px 6px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
-    .stat-title { font-size: 11px; color: #64748b; font-weight: 700; }
-    .stat-usd { font-size: 16px; font-weight: 900; margin-top: 2px; }
-    .stat-lbp { font-size: 11px; color: #64748b; font-weight: 800; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .stat {
+      text-align: center;
+      padding: 14px 8px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+    .stat-title {
+      font-size: 11px;
+      color: var(--subtext);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .stat-usd {
+      font-size: 17px;
+      font-weight: 900;
+      margin-top: 4px;
+    }
+    .stat-lbp {
+      font-size: 11px;
+      color: var(--subtext);
+      font-weight: 800;
+      margin-top: 2px;
+    }
 
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
 
-    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 12px; margin-top: 6px; max-height: 250px; overflow-y: auto; }
+    .report-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 14px;
+      margin-top: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
     
     .report-item-compact {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 10px 6px;
+      border-bottom: 1px solid var(--border);
+      padding: 11px 8px;
       cursor: pointer;
-      transition: background 0.1s ease;
+      border-radius: 10px;
+      transition: background 0.15s ease;
     }
-    .report-item-compact:active { background: #e2e8f0; }
-    .report-item-compact:last-child { border-bottom: none; }
+    .report-item-compact:active {
+      background: #e2e8f0;
+    }
+    .report-item-compact:last-child {
+      border-bottom: none;
+    }
 
-    .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 8px 12px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; color: #78350f; }
-    .rate-box input { width: 95px; padding: 4px 8px; font-size: 12px; text-align: center; margin: 0; }
+    .rate-box {
+      background: #fef3c7;
+      border: 1.5px solid #fde047;
+      padding: 10px 14px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #78350f;
+    }
+    .rate-box input {
+      width: 100px;
+      padding: 6px 10px;
+      font-size: 13px;
+      text-align: center;
+      margin: 0;
+      background: #ffffff;
+    }
+    
+    .driver-card {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      padding: 12px;
+      border-radius: 14px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="header">🍽️ إدارة طلبات وحسابات المطعم</div>
+  <div class="header">🍽️ Restaurant POS & Accounting</div>
 
   <div class="rate-box">
-    <span>سعر الصرف ($1 = LBP):</span>
+    <span>Exchange Rate ($1 = LBP):</span>
     <input type="text" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
+  <!-- Quick Menu Order -->
   <div class="card">
-    <h3 style="color: #047857;">⚡ اختر الوجبات للفاتورة</h3>
+    <h3 style="color: #047857;">⚡ Select Menu Items</h3>
     <div class="menu-grid">
       <div class="menu-btn" onclick="addToCart('فول', 400000)">
         <div class="badge" id="badge-فول">0</div>
-        <div class="menu-name">فول</div>
+        <div class="menu-name">فول (Foul)</div>
         <div class="menu-price">400,000 LBP</div>
       </div>
       <div class="menu-btn" onclick="addToCart('بليلة', 400000)">
         <div class="badge" id="badge-بليلة">0</div>
-        <div class="menu-name">بليلة</div>
+        <div class="menu-name">بليلة (Balila)</div>
         <div class="menu-price">400,000 LBP</div>
       </div>
       <div class="menu-btn" onclick="addToCart('مسبحة', 400000)">
         <div class="badge" id="badge-مسبحة">0</div>
-        <div class="menu-name">مسبحة</div>
+        <div class="menu-name">مسبحة (Msabbaha)</div>
         <div class="menu-price">400,000 LBP</div>
       </div>
       <div class="menu-btn" onclick="addToCart('حمص مطحون', 400000)">
         <div class="badge" id="badge-حمص مطحون">0</div>
-        <div class="menu-name">حمص مطحون</div>
+        <div class="menu-name">حمص (Hummus)</div>
         <div class="menu-price">400,000 LBP</div>
       </div>
       <div class="menu-btn" onclick="addToCart('فتة', 450000)">
         <div class="badge" id="badge-فتة">0</div>
-        <div class="menu-name">فتة</div>
+        <div class="menu-name">فتة (Fatteh)</div>
         <div class="menu-price">450,000 LBP</div>
       </div>
       <div class="menu-btn" onclick="addToCart('فتة اكسترا', 550000)">
@@ -311,16 +499,40 @@
       </div>
       <div class="menu-btn" onclick="addToCart('مرطبات', 50000)">
         <div class="badge" id="badge-مرطبات">0</div>
-        <div class="menu-name">مرطبات</div>
+        <div class="menu-name">مرطبات (Drinks)</div>
         <div class="menu-price">50,000 LBP</div>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <h3>💸 تسجيل مصروف (مشتريات/فواتير)</h3>
+  <!-- Settle Driver Account -->
+  <div class="card" style="border-color: #86efac; background: #f0fdf4;">
+    <h3 style="color: #15803d;">🛵 Settle Driver Account</h3>
     
-    <label>كبسات سريعة للمشتريات والمصاريف:</label>
+    <label>Select Driver to Settle:</label>
+    <select id="settle-driver-select" onchange="calculateDriverBalance()">
+      <option value="حسين">حسين (Hussein)</option>
+      <option value="خالد">خالد (Khaled)</option>
+      <option value="علي">علي (Ali)</option>
+      <option value="غير محدد">General Driver</option>
+    </select>
+
+    <div class="driver-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:bold; font-size:13px; color:#166534;">Pending Amount:</span>
+        <span id="driver-pending-lbp" style="font-weight:900; font-size:16px; color:#ea580c;">0 LBP</span>
+      </div>
+      <div style="font-size:11px; color:#64748b; text-align:right; margin-top:3px;" id="driver-pending-usd">Equivalent: $0.00</div>
+    </div>
+
+    <button onclick="settleDriverAccount()" style="width:100%; padding:13px; background:#10b981; color:white; border:none; border-radius:14px; font-weight:800; font-size:13px; margin-top:10px; cursor:pointer;">✅ Settle Account & Add to Register</button>
+  </div>
+
+  <!-- Add Expense / Purchases -->
+  <div class="card">
+    <h3>💸 Add Expense / Purchases</h3>
+    
+    <label>Quick Expenses Buttons:</label>
     <div class="expense-quick-grid">
       <button class="exp-btn" onclick="setExpenseItem('سمنة')">سمنة</button>
       <button class="exp-btn" onclick="setExpenseItem('لبن')">لبن</button>
@@ -345,7 +557,6 @@
       <button class="exp-btn" onclick="setExpenseItem('دليفري')">دليفري</button>
       <button class="exp-btn" onclick="setExpenseItem('أجار الشباب')">أجار الشباب</button>
       <button class="exp-btn" onclick="setExpenseItem('حسين')">حسين</button>
-
       <button class="exp-btn" onclick="setExpenseItem('خالد')">خالد</button>
       <button class="exp-btn" onclick="setExpenseItem('قجة')">قجة</button>
       <button class="exp-btn" onclick="setExpenseItem('زيت')">زيت</button>
@@ -369,176 +580,180 @@
       <button class="exp-btn" onclick="setExpenseItem('أوردر دليفري')">أوردر دليفري</button>
     </div>
 
-    <label>تفاصيل المصروف Selected</label>
-    <input type="text" id="expense-notes" placeholder="اختر من فوق أو اكتب بنفسك...">
+    <label>Expense Details:</label>
+    <input type="text" id="expense-notes" placeholder="Select above or type manually...">
 
-    <div class="row" style="display:flex; gap:6px; margin-top:6px;">
+    <div class="row" style="display:flex; gap:8px; margin-top:8px;">
       <div style="flex:1;">
-        <label>المبلغ</label>
+        <label>Amount</label>
         <input type="text" id="expense-amount" placeholder="0" oninput="fixNumbers(this)">
       </div>
       <div style="flex:1;">
-        <label>العملة</label>
+        <label>Currency</label>
         <select id="expense-currency">
-          <option value="LBP">ليرة (LBP)</option>
-          <option value="USD">دولار ($)</option>
+          <option value="LBP">LBP (ليرة)</option>
+          <option value="USD">USD ($)</option>
         </select>
       </div>
     </div>
 
-    <button onclick="saveExpense()" style="width:100%; padding:12px; background:#ef4444; color:white; border:none; border-radius:12px; font-weight:800; margin-top:10px; cursor:pointer;">💾 حفظ المصروف</button>
+    <button onclick="saveExpense()" style="width:100%; padding:13px; background:#ef4444; color:white; border:none; border-radius:14px; font-weight:800; margin-top:12px; cursor:pointer;">💾 Save Expense</button>
   </div>
 
+  <!-- Daily Summary -->
   <div class="card">
-    <h3>☀️ ملخص اليوم</h3>
+    <h3>☀️ Daily Summary</h3>
     <div class="grid">
       <div class="stat">
-        <div class="stat-title">مجموع المبيعات</div>
+        <div class="stat-title">Total Sales</div>
         <div id="today-inc-usd" class="stat-usd income">$0</div>
         <div id="today-inc-lbp" class="stat-lbp">0 LBP</div>
       </div>
       <div class="stat">
-        <div class="stat-title">مجموع الدفع (المصاريف)</div>
+        <div class="stat-title">Total Paid (Expenses)</div>
         <div id="today-exp-usd" class="stat-usd expense">$0</div>
         <div id="today-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
     </div>
-    <div class="stat" style="margin-top: 8px; background: #ecfdf5; border-color: #a7f3d0;">
-      <div class="stat-title" style="color:#047857; font-weight:bold;">💵 الباقي (الصافي)</div>
-      <div id="today-net-usd" class="stat-usd" style="font-size:18px;">$0</div>
-      <div id="today-net-lbp" class="stat-lbp" style="font-size:12px; font-weight:800;">0 LBP</div>
+    <div class="stat" style="margin-top: 10px; background: #ecfdf5; border-color: #a7f3d0;">
+      <div class="stat-title" style="color:#047857; font-weight:bold;">💵 Net Remaining</div>
+      <div id="today-net-usd" class="stat-usd" style="font-size:20px;">$0</div>
+      <div id="today-net-lbp" class="stat-lbp" style="font-size:13px; font-weight:800;">0 LBP</div>
     </div>
     
-    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:8px; font-size:10px; text-align:center;">
-      <div style="background:#eff6ff; padding:6px; border-radius:8px; border:1px solid #bfdbfe;">
-        <div style="color:#1d4ed8; font-weight:bold;">🏠 صالة</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:10px; font-size:11px; text-align:center;">
+      <div style="background:#eff6ff; padding:8px 4px; border-radius:10px; border:1px solid #bfdbfe;">
+        <div style="color:#1d4ed8; font-weight:bold;">🏠 Dine-In</div>
         <div id="type-hall-total" style="font-weight:800; color:#1e40af; margin-top:2px;">0 LBP</div>
       </div>
-      <div style="background:#fefce8; padding:6px; border-radius:8px; border:1px solid #fef08a;">
-        <div style="color:#a16207; font-weight:bold;">🛍️ سفري</div>
+      <div style="background:#fefce8; padding:8px 4px; border-radius:10px; border:1px solid #fef08a;">
+        <div style="color:#a16207; font-weight:bold;">🛍️ Takeaway</div>
         <div id="type-takeaway-total" style="font-weight:800; color:#854d0e; margin-top:2px;">0 LBP</div>
       </div>
-      <div style="background:#f0fdf4; padding:6px; border-radius:8px; border:1px solid #bbf7d0;">
-        <div style="color:#15803d; font-weight:bold;">🛵 دليفري</div>
+      <div style="background:#f0fdf4; padding:8px 4px; border-radius:10px; border:1px solid #bbf7d0;">
+        <div style="color:#15803d; font-weight:bold;">🛵 Delivery</div>
         <div id="type-delivery-total" style="font-weight:800; color:#166534; margin-top:2px;">0 LBP</div>
       </div>
     </div>
   </div>
 
+  <!-- Archive & History -->
   <div class="card">
-    <h3>📂 أرشيف الشهور والتاريخ السابق</h3>
-    <div class="row" style="display:flex; gap:6px;">
-      <div style="flex:1;">
-        <label>اختر يوماً محدداً:</label>
-        <input type="date" id="archive-date" onchange="loadArchiveData()">
-      </div>
+    <h3>📂 Archive & Date History</h3>
+    <div class="row">
+      <label>Select Specific Date:</label>
+      <input type="date" id="archive-date" onchange="loadArchiveData()">
     </div>
   </div>
 
+  <!-- Monthly Summary -->
   <div class="card">
-    <h3>📅 ملخص الشهر الحالي</h3>
+    <h3>📅 Monthly Summary</h3>
     <div class="grid">
       <div class="stat">
-        <div class="stat-title">إجمالي المبيعات</div>
+        <div class="stat-title">Monthly Sales</div>
         <div id="month-inc-usd" class="stat-usd income">$0</div>
         <div id="month-inc-lbp" class="stat-lbp">0 LBP</div>
       </div>
       <div class="stat">
-        <div class="stat-title">إجمالي المصاريف</div>
+        <div class="stat-title">Monthly Expenses</div>
         <div id="month-exp-usd" class="stat-usd expense">$0</div>
         <div id="month-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
     </div>
-    <div class="stat" style="margin-top: 8px; background: #f0fdf4; border-color: #bbf7d0;">
-      <div class="stat-title" style="color:#15803d;">صافي الربح الشهري</div>
-      <div id="month-net-usd" class="stat-usd" style="font-size: 16px;">$0</div>
-      <div id="month-net-lbp" class="stat-lbp" style="font-size: 11px; font-weight:bold;">0 LBP</div>
+    <div class="stat" style="margin-top: 10px; background: #f0fdf4; border-color: #bbf7d0;">
+      <div class="stat-title" style="color:#15803d;">Monthly Net Profit</div>
+      <div id="month-net-usd" class="stat-usd" style="font-size: 18px;">$0</div>
+      <div id="month-net-lbp" class="stat-lbp" style="font-size: 12px; font-weight:bold;">0 LBP</div>
     </div>
   </div>
 
+  <!-- Reports & Transactions -->
   <div class="card">
-    <h3>📊 التقارير والتفاصيل</h3>
+    <h3>📊 Reports & Transactions</h3>
     
     <div class="report-tabs">
-      <div class="tab-btn active" id="tab-all" onclick="filterReport('all')">📋 الكل</div>
-      <div class="tab-btn" id="tab-sales" onclick="filterReport('sales')">🛍️ المبيعات</div>
-      <div class="tab-btn" id="tab-expenses" onclick="filterReport('expenses')">💸 المصاريف</div>
-      <div class="tab-btn" id="tab-sections" onclick="filterReport('sections')">📍 الأقسام</div>
+      <div class="tab-btn active" id="tab-all" onclick="filterReport('all')">📋 All</div>
+      <div class="tab-btn" id="tab-sales" onclick="filterReport('sales')">🛍️ Sales</div>
+      <div class="tab-btn" id="tab-expenses" onclick="filterReport('expenses')">💸 Expenses</div>
+      <div class="tab-btn" id="tab-sections" onclick="filterReport('sections')">📍 Sections</div>
     </div>
 
     <div id="today-report" class="report-box">
-      جاري التحميل...
+      Loading data...
     </div>
 
-    <button class="btn-wa" onclick="shareReportWhatsApp()">📲 إرسال التقرير اليومي عبر واتساب</button>
-    <button class="btn-reset" onclick="resetTodayEntries()">🗑️ تصفير وحذف جميع حركات اليوم</button>
+    <button class="btn-wa" onclick="shareReportWhatsApp()">📲 Send Daily Report via WhatsApp</button>
+    <button class="btn-reset" onclick="resetTodayEntries()">🗑️ Reset & Delete All Daily Records</button>
   </div>
 
+  <!-- Floating Order Bar -->
   <div class="floating-cart-bar" onclick="openModal()">
-    <div style="display:flex; align-items:center; gap:8px;">
-      <span style="font-size:18px;">🛒</span>
-      <span>عرض الفاتورة (<span id="float-count">0</span> أصناف)</span>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:20px;">🛒</span>
+      <span>View Cart (<span id="float-count">0</span> items)</span>
     </div>
-    <div id="float-total-lbp" style="font-size:16px;">0 LBP</div>
+    <div id="float-total-lbp" style="font-size:17px;">0 LBP</div>
   </div>
 
+  <!-- Cart Modal -->
   <div class="modal-overlay" id="cart-modal">
     <div class="modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 style="margin:0; font-size:16px; color:#ea580c;">🧾 مراجعة الفاتورة</h3>
-        <button onclick="closeModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:17px; color:#ea580c;">🧾 Order Review</h3>
+        <button onclick="closeModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; font-weight:bold; cursor:pointer;">✕</button>
       </div>
 
-      <label>نوع الطلب:</label>
+      <label>Order Type:</label>
       <div class="order-type-grid">
-        <div class="type-btn active" id="type-hall" onclick="setOrderType('داخل المطعم')">🏠 صالة</div>
-        <div class="type-btn" id="type-takeaway" onclick="setOrderType('تيك أواي')">🛍️ سفري</div>
-        <div class="type-btn" id="type-delivery" onclick="setOrderType('دليفري')">🛵 دليفري</div>
+        <div class="type-btn active" id="type-hall" onclick="setOrderType('داخل المطعم')">🏠 Dine-In</div>
+        <div class="type-btn" id="type-takeaway" onclick="setOrderType('تيك أواي')">🛍️ Takeaway</div>
+        <div class="type-btn" id="type-delivery" onclick="setOrderType('دليفري')">🛵 Delivery</div>
       </div>
 
-      <!-- اختيار اسم سائق الدليفري عند اختيار دليفري -->
-      <div id="driver-select-box" style="display:none; margin-top:8px;">
-        <label>سائق الدليفري المسؤول:</label>
+      <div id="driver-select-box" style="display:none; margin-top:10px;">
+        <label>Assigned Delivery Driver:</label>
         <select id="driver-name">
-          <option value="حسين">حسين</option>
-          <option value="خالد">خالد</option>
-          <option value="علي">علي</option>
-          <option value="غير محدد">عام / غير محدد</option>
+          <option value="حسين">حسين (Hussein)</option>
+          <option value="خالد">خالد (Khaled)</option>
+          <option value="علي">علي (Ali)</option>
+          <option value="غير محدد">General Driver</option>
         </select>
       </div>
 
       <div id="cart-items" class="cart-box">
-        لا توجد وجبات بالفاتورة.
+        No items in order.
       </div>
 
-      <div style="text-align:center; margin-top:12px; font-weight:bold;">
-        <div style="font-size:18px; color:#ea580c;" id="modal-total-lbp">0 LBP</div>
-        <div style="font-size:12px; color:#64748b;" id="modal-total-usd">ما يعادل: $0.00</div>
+      <div style="text-align:center; margin-top:14px; font-weight:bold;">
+        <div style="font-size:20px; color:#ea580c;" id="modal-total-lbp">0 LBP</div>
+        <div style="font-size:13px; color:#64748b;" id="modal-total-usd">Equivalent: $0.00</div>
       </div>
 
-      <button class="btn-save" id="save-order-btn" onclick="saveOrder()">✅ حفظ الفاتورة بالحسابات</button>
-      <button class="btn-wa" onclick="shareWhatsApp()">📲 إرسال الفاتورة عبر واتساب</button>
-      <button onclick="clearCart(); closeModal();" style="width:100%; background:none; border:none; color:#dc2626; font-size:12px; font-weight:bold; margin-top:8px; cursor:pointer;">🗑️ تفريغ الفاتورة وإلغاء</button>
+      <button class="btn-save" id="save-order-btn" onclick="saveOrder()">✅ Save Order to Register</button>
+      <button class="btn-wa" onclick="shareWhatsApp()">📲 Send Invoice via WhatsApp</button>
+      <button onclick="clearCart(); closeModal();" style="width:100%; background:none; border:none; color:#dc2626; font-size:12px; font-weight:bold; margin-top:10px; cursor:pointer;">🗑️ Clear Order & Close</button>
     </div>
   </div>
 
+  <!-- Item Detail Modal -->
   <div class="modal-overlay" id="detail-modal">
     <div class="modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 style="margin:0; font-size:16px; color:#1e293b;" id="detail-title">📌 تفاصيل الحركة</h3>
-        <button onclick="closeDetailModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:16px; color:#1e293b;" id="detail-title">📌 Transaction Details</h3>
+        <button onclick="closeDetailModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; font-weight:bold; cursor:pointer;">✕</button>
       </div>
 
-      <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:12px; margin-top:8px; font-size:13px; line-height:1.6;" id="detail-body">
-        جاري التحميل...
+      <div style="background:#f8fafc; border:1px solid var(--border); padding:14px; border-radius:14px; margin-top:8px; font-size:13px; line-height:1.6;" id="detail-body">
+        Loading details...
       </div>
 
-      <div style="text-align:center; margin-top:12px; font-weight:bold;">
+      <div style="text-align:center; margin-top:14px; font-weight:bold;">
         <div style="font-size:18px; color:#10b981;" id="detail-amount-lbp">0 LBP</div>
         <div style="font-size:12px; color:#64748b;" id="detail-amount-usd">$0.00</div>
       </div>
 
-      <button id="detail-delete-btn" style="width:100%; padding:12px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:12px; font-weight:800; font-size:14px; margin-top:12px; cursor:pointer;">🗑️ حذف هذه الحركة</button>
+      <button id="detail-delete-btn" style="width:100%; padding:13px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:14px; font-weight:800; font-size:14px; margin-top:14px; cursor:pointer;">🗑️ Delete Transaction</button>
     </div>
   </div>
 
@@ -643,7 +858,7 @@
 
       const container = document.getElementById('cart-items');
       if (cart.length === 0) {
-        container.innerHTML = 'لا توجد وجبات بالفاتورة.';
+        container.innerHTML = 'No items in order.';
       } else {
         let html = '';
         cart.forEach(item => {
@@ -652,8 +867,8 @@
             <div class="cart-item">
               <div><strong>${item.name}</strong> (x${item.qty})</div>
               <div>
-                <span style="font-weight:bold; color:#ea580c; margin-left:8px;">${itemTotal.toLocaleString()} LBP</span>
-                <button onclick="removeFromCart('${item.name}')" style="background:#fee2e2; color:#dc2626; border:none; border-radius:4px; padding:2px 6px; font-weight:bold; cursor:pointer;">-</button>
+                <span style="font-weight:bold; color:#ea580c; margin-right:8px;">${itemTotal.toLocaleString()} LBP</span>
+                <button onclick="removeFromCart('${item.name}')" style="background:#fee2e2; color:#dc2626; border:none; border-radius:6px; padding:3px 8px; font-weight:bold; cursor:pointer;">-</button>
               </div>
             </div>`;
         });
@@ -664,7 +879,7 @@
       const totalUSD = totalLBP / rate;
 
       document.getElementById('modal-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
-      document.getElementById('modal-total-usd').innerText = 'ما يعادل: $' + totalUSD.toFixed(2);
+      document.getElementById('modal-total-usd').innerText = 'Equivalent: $' + totalUSD.toFixed(2);
     }
 
     function openModal() { document.getElementById('cart-modal').classList.add('active'); }
@@ -679,13 +894,13 @@
       const lbpValue = Math.round(amtUSD * rate).toLocaleString();
 
       document.getElementById('detail-title').innerText = item.category;
-      document.getElementById('detail-body').innerText = item.notes || 'لا توجد تفاصيل إضافية.';
+      document.getElementById('detail-body').innerText = item.notes || 'No extra notes.';
       document.getElementById('detail-amount-lbp').innerText = lbpValue + ' LBP';
-      document.getElementById('detail-amount-usd').innerText = 'ما يعادل: $' + amtUSD.toFixed(2);
+      document.getElementById('detail-amount-usd').innerText = 'Equivalent: $' + amtUSD.toFixed(2);
       
       const delBtn = document.getElementById('detail-delete-btn');
       delBtn.onclick = async function() {
-        if (confirm('هل أنت تأكد من حذف هذه الحركة؟')) {
+        if (confirm('Are you sure you want to delete this record?')) {
           await deleteEntry(id);
           closeDetailModal();
         }
@@ -698,18 +913,75 @@
       document.getElementById('detail-modal').classList.remove('active');
     }
 
+    function calculateDriverBalance() {
+      const driver = document.getElementById('settle-driver-select').value;
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      
+      let pendingUSD = 0;
+      globalTodayData.forEach(item => {
+        if (item.category.includes(`معلق: ${driver}`)) {
+          pendingUSD += Number(item.amount);
+        }
+      });
+
+      const pendingLBP = Math.round(pendingUSD * rate);
+      document.getElementById('driver-pending-lbp').innerText = pendingLBP.toLocaleString() + ' LBP';
+      document.getElementById('driver-pending-usd').innerText = 'Equivalent: $' + pendingUSD.toFixed(2);
+    }
+
+    async function settleDriverAccount() {
+      const driver = document.getElementById('settle-driver-select').value;
+      const pendingItems = globalTodayData.filter(item => item.category.includes(`معلق: ${driver}`));
+
+      if (pendingItems.length === 0) {
+        alert(`No pending orders for driver (${driver})!`);
+        return;
+      }
+
+      if (confirm(`Are you sure you want to settle driver (${driver}) account and move funds to Register?`)) {
+        const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+        let totalUSD = 0;
+        const idsToDelete = [];
+
+        pendingItems.forEach(item => {
+          totalUSD += Number(item.amount);
+          idsToDelete.push(item.id);
+        });
+
+        await supabaseClient.from('restaurant_expenses').delete().in('id', idsToDelete);
+
+        const d = new Date();
+        const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+        const { error } = await supabaseClient.from('restaurant_expenses').insert([{
+          entry_date: todayFormatted,
+          type: 'income',
+          category: `طلب دليفري (${driver})`,
+          amount: totalUSD,
+          notes: `Settled driver ${driver} full amount of ${Math.round(totalUSD * rate).toLocaleString()} LBP`
+        }]);
+
+        if (error) {
+          alert('Error settling account: ' + error.message);
+        } else {
+          alert(`Successfully settled driver (${driver}) account! ✅`);
+          loadData();
+        }
+      }
+    }
+
     function shareWhatsApp() {
       if (cart.length === 0) {
-        alert('الفاتورة فارغة!');
+        alert('Cart is empty!');
         return;
       }
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       let totalLBP = 0;
-      let msg = `🍽️ *فاتورة مطعم*\n`;
-      msg += `📍 *نوع الطلب:* ${currentOrderType}\n`;
+      let msg = `🍽️ *Restaurant Receipt*\n`;
+      msg += `📍 *Order Type:* ${currentOrderType}\n`;
       if (currentOrderType === 'دليفري') {
         const driver = document.getElementById('driver-name').value;
-        msg += `🛵 *السائق:* ${driver}\n`;
+        msg += `🛵 *Driver:* ${driver}\n`;
       }
       msg += `---------------------\n`;
 
@@ -721,7 +993,7 @@
 
       const totalUSD = (totalLBP / rate).toFixed(2);
       msg += `---------------------\n`;
-      msg += `💰 *المجموع:* ${totalLBP.toLocaleString()} LBP ($${totalUSD})\n`;
+      msg += `💰 *Total:* ${totalLBP.toLocaleString()} LBP ($${totalUSD})\n`;
 
       const encodedMsg = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
@@ -735,20 +1007,22 @@
       let tExp = 0;
 
       globalTodayData.forEach(item => {
-        const amtUSD = Number(item.amount);
-        if (item.type === 'income') tInc += amtUSD;
-        if (item.type === 'expense') tExp += amtUSD;
+        if (!item.category.includes('معلق:')) {
+          const amtUSD = Number(item.amount);
+          if (item.type === 'income') tInc += amtUSD;
+          if (item.type === 'expense') tExp += amtUSD;
+        }
       });
 
       const tNet = tInc - tExp;
 
-      let msg = `📊 *التقرير المالي للصندوق*\n`;
-      msg += `📅 *التاريخ:* ${selectedDate}\n`;
+      let msg = `📊 *Daily Register Report*\n`;
+      msg += `📅 *Date:* ${selectedDate}\n`;
       msg += `---------------------\n`;
-      msg += `🛍️ *مجموع المبيعات:* ${Math.round(tInc * rate).toLocaleString()} LBP ($${tInc.toFixed(2)})\n`;
-      msg += `💸 *مجموع الدفع (المصاريف):* ${Math.round(tExp * rate).toLocaleString()} LBP ($${tExp.toFixed(2)})\n`;
+      msg += `🛍️ *Total Sales:* ${Math.round(tInc * rate).toLocaleString()} LBP ($${tInc.toFixed(2)})\n`;
+      msg += `💸 *Total Expenses:* ${Math.round(tExp * rate).toLocaleString()} LBP ($${tExp.toFixed(2)})\n`;
       msg += `---------------------\n`;
-      msg += `💵 *الباقي (الصافي):* ${Math.round(tNet * rate).toLocaleString()} LBP ($${tNet.toFixed(2)})\n`;
+      msg += `💵 *Net Remaining:* ${Math.round(tNet * rate).toLocaleString()} LBP ($${tNet.toFixed(2)})\n`;
 
       const encodedMsg = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
@@ -761,10 +1035,10 @@
     }
 
     async function resetTodayEntries() {
-      if (confirm('هل أنت تأكد من حذف وتصفير جميع حركات هذا اليوم؟')) {
+      if (confirm('Are you sure you want to reset and delete all records for this day?')) {
         const idsToDelete = globalTodayData.map(item => item.id);
         if (idsToDelete.length === 0) {
-          alert('لا توجد حركات لتصفيرها!');
+          alert('No records to reset!');
           return;
         }
 
@@ -774,9 +1048,9 @@
           .in('id', idsToDelete);
 
         if (error) {
-          alert('خطأ بالتصفير: ' + error.message);
+          alert('Error resetting: ' + error.message);
         } else {
-          alert('تم تصفير الحسابات بنجاح! ✅');
+          alert('Successfully reset daily records! ✅');
           loadData();
         }
       }
@@ -784,7 +1058,7 @@
 
     async function saveOrder() {
       if (cart.length === 0) {
-        alert('الرجاء اختيار وجبات أولاً!');
+        alert('Please select menu items first!');
         return;
       }
 
@@ -803,16 +1077,16 @@
 
       if (currentOrderType === 'دليفري') {
         driverName = document.getElementById('driver-name').value;
-        catName = `طلب دليفري (${driverName})`;
+        catName = `طلب دليفري (معلق: ${driverName})`;
       }
 
-      const detailsStr = `[${currentOrderType}] ${driverName ? 'السائق: ' + driverName + ' | ' : ''}${detailsArr.join('، ')} (${totalLBP.toLocaleString()} LBP)`;
+      const detailsStr = `[${currentOrderType}] ${driverName ? 'Driver: ' + driverName + ' | ' : ''}${detailsArr.join(', ')} (${totalLBP.toLocaleString()} LBP)`;
 
       const d = new Date();
       const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
       const btn = document.getElementById('save-order-btn');
-      btn.innerText = 'جاري الحفظ...';
+      btn.innerText = 'Saving...';
       btn.disabled = true;
 
       try {
@@ -827,17 +1101,17 @@
           }]);
 
         if (error) {
-          alert('خطأ بالحفظ: ' + error.message);
+          alert('Save error: ' + error.message);
         } else {
-          alert('تم حفظ الفاتورة بنجاح! ✅');
+          alert(currentOrderType === 'دليفري' ? `Delivery order saved under driver (${driverName}) pending list ✅` : 'Order saved successfully! ✅');
           clearCart();
           closeModal();
           loadData();
         }
       } catch (err) {
-        alert('حدث خطأ: ' + err.message);
+        alert('Error: ' + err.message);
       } finally {
-        btn.innerText = '✅ حفظ الفاتورة بالحسابات';
+        btn.innerText = '✅ Save Order to Register';
         btn.disabled = false;
       }
     }
@@ -849,7 +1123,7 @@
         .eq('id', id);
 
       if (error) {
-        alert('خطأ بالحذف: ' + error.message);
+        alert('Delete error: ' + error.message);
       } else {
         loadData();
       }
@@ -858,11 +1132,11 @@
     async function saveExpense() {
       const amountVal = parseArabicNumber(document.getElementById('expense-amount').value);
       const currency = document.getElementById('expense-currency').value;
-      const notes = document.getElementById('expense-notes').value || 'مصروف عام';
+      const notes = document.getElementById('expense-notes').value || 'General Expense';
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
 
       if (!amountVal || amountVal <= 0) {
-        alert('الرجاء إدخال مبلغ صحيح!');
+        alert('Please enter a valid amount!');
         return;
       }
 
@@ -881,9 +1155,9 @@
         }]);
 
       if (error) {
-        alert('خطأ: ' + error.message);
+        alert('Error: ' + error.message);
       } else {
-        alert('تم حفظ المصروف بنجاح! ✅');
+        alert('Expense saved successfully! ✅');
         document.getElementById('expense-amount').value = '';
         document.getElementById('expense-notes').value = '';
         loadData();
@@ -903,14 +1177,14 @@
 
       const filtered = globalTodayData.filter(item => {
         if (currentReportFilter === 'all') return true;
-        if (currentReportFilter === 'sales') return item.type === 'income';
+        if (currentReportFilter === 'sales') return item.type === 'income' && !item.category.includes('معلق:');
         if (currentReportFilter === 'expenses') return item.type === 'expense';
         if (currentReportFilter === 'sections') return item.type === 'income' && (item.category.includes('صالة') || item.category.includes('تيك أواي') || item.category.includes('دليفري'));
         return true;
       });
 
       if (filtered.length === 0) {
-        document.getElementById('today-report').innerHTML = 'لا توجد بيانات مسجلة.';
+        document.getElementById('today-report').innerHTML = 'No records found.';
         return;
       }
 
@@ -924,9 +1198,9 @@
           <div class="report-item-compact" onclick="openDetailModal(${item.id})">
             <div>
               <strong style="font-size:13px;">📌 ${item.category}</strong>
-              <div style="font-size:10px; color:#94a3b8; margin-top:2px;">إضغط لمشاهدة التفاصيل 🔍</div>
+              <div style="font-size:10px; color:#94a3b8; margin-top:2px;">Click to view details 🔍</div>
             </div>
-            <div style="text-align:left;">
+            <div style="text-align:right;">
               <div class="${color}" style="font-weight:bold; font-size:13px;">${sign}$${amtUSD.toFixed(2)}</div>
               <div style="font-size:10px; color:#64748b; font-weight:700;">${sign}${lbpValue} LBP</div>
             </div>
@@ -955,7 +1229,7 @@
         .order('id', { ascending: false });
 
       if (error) {
-        document.getElementById('today-report').innerHTML = 'خطأ بالتثبيت: ' + error.message;
+        document.getElementById('today-report').innerHTML = 'Error loading data: ' + error.message;
         return;
       }
 
@@ -968,13 +1242,13 @@
         data.forEach(item => {
           const amtUSD = Number(item.amount);
           
-          if (item.type === 'income') mInc += amtUSD;
+          if (item.type === 'income' && !item.category.includes('معلق:')) mInc += amtUSD;
           if (item.type === 'expense') mExp += amtUSD;
 
           if (item.entry_date === todayStr) {
             globalTodayData.push(item);
 
-            if (item.type === 'income') {
+            if (item.type === 'income' && !item.category.includes('معلق:')) {
               tInc += amtUSD;
               if (item.category.includes('داخل المطعم')) hallTotal += (amtUSD * rate);
               else if (item.category.includes('تيك أواي')) takeawayTotal += (amtUSD * rate);
@@ -1010,6 +1284,7 @@
         mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
         document.getElementById('month-net-lbp').innerText = Math.round(mNet * rate).toLocaleString() + ' LBP';
 
+        calculateDriverBalance();
         renderFilteredReport();
       }
     }
