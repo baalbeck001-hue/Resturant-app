@@ -133,6 +133,25 @@
       color: #1d4ed8;
     }
 
+    /* أزرار الفلترة للتقارير */
+    .report-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-top: 8px; margin-bottom: 8px; }
+    .tab-btn {
+      padding: 8px 2px;
+      border: 1.5px solid #cbd5e1;
+      background: #f1f5f9;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: pointer;
+      color: #475569;
+    }
+    .tab-btn.active {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #047857;
+    }
+
     .cart-box { background: #fff8f1; border: 1.5px dashed #f97316; padding: 10px; border-radius: 12px; margin-top: 8px; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fed7aa; padding: 6px 0; font-size: 13px; }
     .cart-item:last-child { border-bottom: none; }
@@ -176,7 +195,7 @@
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
 
-    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 220px; overflow-y: auto; }
+    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 250px; overflow-y: auto; }
     .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 8px 0; font-size: 12px; }
     .btn-del { background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer; margin-right: 6px; }
     
@@ -341,8 +360,18 @@
     </div>
   </div>
 
+  <!-- قسم التقارير المخصصة والمنفصلة -->
   <div class="card">
-    <h3>🔍 حركات اليوم التفصيلية</h3>
+    <h3>📊 التقارير والتفاصيل</h3>
+    
+    <!-- أزرار اختيار التقرير -->
+    <div class="report-tabs">
+      <div class="tab-btn active" id="tab-all" onclick="filterReport('all')">📋 الكل</div>
+      <div class="tab-btn" id="tab-sales" onclick="filterReport('sales')">🛍️ المبيعات</div>
+      <div class="tab-btn" id="tab-expenses" onclick="filterReport('expenses')">💸 الدفع/المصاريف</div>
+      <div class="tab-btn" id="tab-sections" onclick="filterReport('sections')">📍 الأقسام</div>
+    </div>
+
     <div id="today-report" class="report-box">
       جاري التحميل...
     </div>
@@ -393,6 +422,8 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentOrderType = 'داخل المطعم';
+    let currentReportFilter = 'all';
+    let globalTodayData = [];
     let cart = [];
 
     function setOrderType(type) {
@@ -614,6 +645,56 @@
       }
     }
 
+    // فلترة التقارير
+    function filterReport(type) {
+      currentReportFilter = type;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`tab-${type}`).classList.add('active');
+      renderFilteredReport();
+    }
+
+    function renderFilteredReport() {
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      let todayHtml = '';
+
+      const filtered = globalTodayData.filter(item => {
+        if (currentReportFilter === 'all') return true;
+        if (currentReportFilter === 'sales') return item.type === 'income';
+        if (currentReportFilter === 'expenses') return item.type === 'expense';
+        if (currentReportFilter === 'sections') return item.type === 'income' && (item.category.includes('صالة') || item.category.includes('تيك أواي') || item.category.includes('دليفري'));
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        document.getElementById('today-report').innerHTML = 'لا توجد بيانات لهذه التصفية اليوم.';
+        return;
+      }
+
+      filtered.forEach(item => {
+        const amtUSD = Number(item.amount);
+        const color = item.type === 'income' ? 'income' : 'expense';
+        const sign = item.type === 'income' ? '+' : '-';
+        const lbpValue = Math.round(amtUSD * rate).toLocaleString();
+        
+        todayHtml += `
+          <div class="report-item">
+            <div style="display:flex; align-items:center;">
+              <button class="btn-del" onclick="deleteEntry(${item.id})">🗑️</button>
+              <div>
+                <strong>📌 ${item.category}</strong>
+                <div style="font-size:10px; color:#64748b;">${item.notes || ''}</div>
+              </div>
+            </div>
+            <div style="text-align:left;">
+              <div class="${color}" style="font-weight:bold;">${sign}$${amtUSD.toFixed(2)}</div>
+              <div style="font-size:9px; color:#94a3b8;">${sign}${lbpValue} LBP</div>
+            </div>
+          </div>`;
+      });
+
+      document.getElementById('today-report').innerHTML = todayHtml;
+    }
+
     async function loadData() {
       const rateElem = document.getElementById('exchange-rate');
       const rate = rateElem ? (parseFloat(rateElem.value) || 90000) : 90000;
@@ -636,7 +717,7 @@
       let mInc = 0, mExp = 0;
       let tInc = 0, tExp = 0;
       let hallTotal = 0, takeawayTotal = 0, deliveryTotal = 0;
-      let todayHtml = '';
+      globalTodayData = [];
 
       if (data) {
         data.forEach(item => {
@@ -646,6 +727,8 @@
           if (item.type === 'expense') mExp += amtUSD;
 
           if (item.entry_date === todayStr) {
+            globalTodayData.push(item);
+
             if (item.type === 'income') {
               tInc += amtUSD;
               if (item.category.includes('داخل المطعم')) hallTotal += (amtUSD * rate);
@@ -653,25 +736,6 @@
               else if (item.category.includes('دليفري')) deliveryTotal += (amtUSD * rate);
             }
             if (item.type === 'expense') tExp += amtUSD;
-
-            const color = item.type === 'income' ? 'income' : 'expense';
-            const sign = item.type === 'income' ? '+' : '-';
-            const lbpValue = Math.round(amtUSD * rate).toLocaleString();
-            
-            todayHtml += `
-              <div class="report-item">
-                <div style="display:flex; align-items:center;">
-                  <button class="btn-del" onclick="deleteEntry(${item.id})">🗑️</button>
-                  <div>
-                    <strong>📌 ${item.category}</strong>
-                    <div style="font-size:10px; color:#64748b;">${item.notes || ''}</div>
-                  </div>
-                </div>
-                <div style="text-align:left;">
-                  <div class="${color}" style="font-weight:bold;">${sign}$${amtUSD.toFixed(2)}</div>
-                  <div style="font-size:9px; color:#94a3b8;">${sign}${lbpValue} LBP</div>
-                </div>
-              </div>`;
           }
         });
 
@@ -701,7 +765,7 @@
         mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
         document.getElementById('month-net-lbp').innerText = Math.round(mNet * rate).toLocaleString() + ' LBP';
 
-        document.getElementById('today-report').innerHTML = todayHtml || 'لا توجد حركات مسجلة اليوم حتى الآن.';
+        renderFilteredReport();
       }
     }
 
