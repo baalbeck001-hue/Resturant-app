@@ -22,7 +22,7 @@
       direction: rtl;
       color: var(--text);
     }
-    .header { text-align: center; padding: 8px 0; font-weight: 800; font-size: 18px; color: #1e293b; }
+    .header { text-align: center; padding: 6px 0; font-weight: 800; font-size: 18px; color: #1e293b; }
     .card { background: var(--card-bg); padding: 12px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 10px; border: 1px solid #e2e8f0; }
     h3 { margin: 0 0 8px 0; color: #334155; font-size: 15px; display: flex; align-items: center; gap: 6px; }
     label { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 4px; display: block; }
@@ -32,14 +32,15 @@
     .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
     .menu-btn {
       background: #f0fdf4;
-      border: 1.5px solid #bbf7d0;
+      border: 1.5px solid #10b981;
       padding: 10px 8px;
       border-radius: 10px;
       text-align: right;
       cursor: pointer;
-      transition: all 0.1s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .menu-btn:active { background: #dcfce7; transform: scale(0.97); }
+    .menu-btn:active { background: #bbf7d0; transform: scale(0.96); }
     .menu-name { font-weight: bold; font-size: 13px; color: #166534; }
     .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; }
 
@@ -65,7 +66,7 @@
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
 
-    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 150px; overflow-y: auto; }
+    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 180px; overflow-y: auto; }
     .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 6px 0; font-size: 12px; }
     .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: bold; color: #78350f; }
     .rate-box input { width: 90px; padding: 3px 6px; font-size: 12px; text-align: center; margin: 0; }
@@ -81,7 +82,7 @@
     <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
-  <!-- لوحة المنيو السريع (كبسة وحدة بتسجل البيعة فوراً) -->
+  <!-- لوحة المنيو السريع -->
   <div class="card" style="background: #fdfefe; border: 2px solid #10b981;">
     <h3 style="color: #047857;">⚡ مبيعات سريعة (كبسة وحدة)</h3>
     <div class="menu-grid">
@@ -105,9 +106,9 @@
         <div class="menu-name">فتة</div>
         <div class="menu-price">45,000 ليرة</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('فتة اكسترا', 50000)">
+      <div class="menu-btn" onclick="quickSale('فتة اكسترا', 55000)">
         <div class="menu-name">فتة اكسترا</div>
-        <div class="menu-price">50,000 ليرة</div>
+        <div class="menu-price">55,000 ليرة</div>
       </div>
       <div class="menu-btn" onclick="quickSale('فتة لسانات', 70000)">
         <div class="menu-name">فتة لسانات</div>
@@ -129,14 +130,22 @@
         <div class="menu-name">حمص بلحمة</div>
         <div class="menu-price">60,000 ليرة</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('فتة لحمة', 70000)">
+      <div class="menu-btn" onclick="quickSale('فتة لحمة', 65000)">
         <div class="menu-name">فتة لحمة</div>
-        <div class="menu-price">70,000 ليرة</div>
+        <div class="menu-price">65,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('مرطبات', 15000)">
+        <div class="menu-name">مرطبات</div>
+        <div class="menu-price">15,000 ليرة</div>
+      </div>
+      <div class="menu-btn" onclick="quickSale('مياه', 10000)">
+        <div class="menu-name">مياه</div>
+        <div class="menu-price">10,000 ليرة</div>
       </div>
     </div>
   </div>
 
-  <!-- تسجيل حركة يدوية (مصاريف أو غيره) -->
+  <!-- تسجيل حركة يدوية -->
   <div class="card">
     <h3>📝 تسجيل مصروف أو حركة أخرى</h3>
     <div class="row" style="display:flex; gap:6px;">
@@ -229,31 +238,42 @@
 
     document.getElementById('entry_date').valueAsDate = new Date();
 
-    // كبسة سريعة بلمسة واحدة (1-Click Sale)
+    // كبسة سريعة بلمسة واحدة
     async function quickSale(itemName, priceLBP) {
-      const entry_date = new Date().toISOString().split('T')[0];
-      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
-      const amountUSD = priceLBP / rate;
+      try {
+        const rateElem = document.getElementById('exchange-rate');
+        const rate = rateElem ? (parseFloat(rateElem.value) || 90000) : 90000;
+        const amountUSD = priceLBP / rate;
+        
+        // تاريخ اليوم المحلي
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const todayFormatted = `${year}-${month}-${day}`;
 
-      const { error } = await supabaseClient
-        .from('restaurant_expenses')
-        .insert([{ 
-          entry_date: entry_date, 
-          type: 'income', 
-          category: itemName, 
-          amount: amountUSD, 
-          notes: `${priceLBP.toLocaleString()} LBP` 
-        }]);
+        const { error } = await supabaseClient
+          .from('restaurant_expenses')
+          .insert([{ 
+            entry_date: todayFormatted, 
+            type: 'income', 
+            category: itemName, 
+            amount: amountUSD, 
+            notes: `${priceLBP.toLocaleString()} LBP` 
+          }]);
 
-      if (error) {
-        alert('خطأ: ' + error.message);
-      } else {
-        // تحديث البيانات فوراً
-        loadData();
+        if (error) {
+          alert('خطأ بالحفظ: ' + error.message);
+        } else {
+          // تحديث البيانات فوراً
+          loadData();
+        }
+      } catch(err) {
+        alert('حدث خطأ: ' + err.message);
       }
     }
 
-    // حفظ حركة يدوية (مثل المصاريف)
+    // حفظ حركة يدوية
     async function saveCustomEntry() {
       const entry_date = document.getElementById('entry_date').value;
       const type = document.getElementById('type').value;
@@ -291,11 +311,17 @@
     }
 
     async function loadData() {
-      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const rateElem = document.getElementById('exchange-rate');
+      const rate = rateElem ? (parseFloat(rateElem.value) || 90000) : 90000;
+      
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      const todayStr = now.toISOString().split('T')[0];
+      
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
 
       const { data, error } = await supabaseClient
         .from('restaurant_expenses')
@@ -323,7 +349,7 @@
 
             const color = item.type === 'income' ? 'income' : 'expense';
             const sign = item.type === 'income' ? '+' : '-';
-            const lbpValue = (amtUSD * rate).toLocaleString();
+            const lbpValue = Math.round(amtUSD * rate).toLocaleString();
             
             todayHtml += `
               <div class="report-item">
@@ -341,26 +367,26 @@
 
         // تحديث الأرقام
         document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
-        document.getElementById('today-inc-lbp').innerText = (tInc * rate).toLocaleString() + ' LBP';
+        document.getElementById('today-inc-lbp').innerText = Math.round(tInc * rate).toLocaleString() + ' LBP';
         document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
-        document.getElementById('today-exp-lbp').innerText = (tExp * rate).toLocaleString() + ' LBP';
+        document.getElementById('today-exp-lbp').innerText = Math.round(tExp * rate).toLocaleString() + ' LBP';
         
         const tNet = tInc - tExp;
         const tNetElem = document.getElementById('today-net-usd');
         tNetElem.innerText = '$' + tNet.toFixed(2);
         tNetElem.className = 'stat-usd ' + (tNet >= 0 ? 'income' : 'expense');
-        document.getElementById('today-net-lbp').innerText = (tNet * rate).toLocaleString() + ' LBP';
+        document.getElementById('today-net-lbp').innerText = Math.round(tNet * rate).toLocaleString() + ' LBP';
 
         document.getElementById('month-inc-usd').innerText = '$' + mInc.toFixed(2);
-        document.getElementById('month-inc-lbp').innerText = (mInc * rate).toLocaleString() + ' LBP';
+        document.getElementById('month-inc-lbp').innerText = Math.round(mInc * rate).toLocaleString() + ' LBP';
         document.getElementById('month-exp-usd').innerText = '$' + mExp.toFixed(2);
-        document.getElementById('month-exp-lbp').innerText = (mExp * rate).toLocaleString() + ' LBP';
+        document.getElementById('month-exp-lbp').innerText = Math.round(mExp * rate).toLocaleString() + ' LBP';
 
         const mNet = mInc - mExp;
         const mNetElem = document.getElementById('month-net-usd');
         mNetElem.innerText = '$' + mNet.toFixed(2);
         mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
-        document.getElementById('month-net-lbp').innerText = (mNet * rate).toLocaleString() + ' LBP';
+        document.getElementById('month-net-lbp').innerText = Math.round(mNet * rate).toLocaleString() + ' LBP';
 
         document.getElementById('today-report').innerHTML = todayHtml || 'لا توجد حركات مسجلة اليوم حتى الآن.';
       }
