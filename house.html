@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>House & Personal Expenses</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #dc2626;
+      --navy: #1e293b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --subtext: #475569;
+      --border: #cbd5e1;
+      --radius: 12px;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 14px;
+      padding-bottom: 50px;
+      color: var(--text);
+    }
+    .header {
+      text-align: center;
+      padding: 10px 0 16px;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--primary-dark);
+      letter-spacing: -0.3px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+    h3 {
+      margin: 0 0 12px 0;
+      color: var(--navy);
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+    }
+    label {
+      font-size: 11px;
+      color: var(--subtext);
+      font-weight: 700;
+      margin-top: 8px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      margin-top: 4px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #ffffff;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+    
+    .expense-quick-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      max-height: 140px;
+      overflow-y: auto;
+      padding: 8px;
+      background: #f1f5f9;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      direction: rtl;
+    }
+    .exp-btn {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+    }
+    .exp-btn:active {
+      background: #dbeafe;
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .stat {
+      text-align: center;
+      padding: 12px 8px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+    .stat-title {
+      font-size: 11px;
+      color: var(--subtext);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .stat-usd {
+      font-size: 16px;
+      font-weight: 900;
+      margin-top: 4px;
+      color: var(--primary);
+    }
+    .stat-lbp {
+      font-size: 11px;
+      color: var(--subtext);
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .report-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 10px;
+      margin-top: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .report-item-compact {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 6px;
+      font-size: 13px;
+    }
+    .report-item-compact:last-child {
+      border-bottom: none;
+    }
+
+    .rate-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #1e40af;
+    }
+    .rate-box input {
+      width: 100px;
+      padding: 6px 10px;
+      font-size: 13px;
+      text-align: center;
+      margin: 0;
+      background: #ffffff;
+    }
+    
+    .btn-save {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 13px;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+    .btn-wa {
+      width: 100%;
+      padding: 12px;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 13px;
+      margin-top: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .link-btn {
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .link-btn a {
+      color: var(--primary);
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">🏠 House & Personal Accounting</div>
+
+  <div class="link-btn">
+    <a href="index.html">← Go back to Restaurant POS</a>
+  </div>
+
+  <div class="rate-box">
+    <span>Exchange Rate ($1 = LBP):</span>
+    <input type="text" id="exchange-rate" value="90000" onchange="loadHouseData()">
+  </div>
+
+  <!-- Add House Expense -->
+  <div class="card">
+    <h3>💸 Add House / Personal Expense</h3>
+    
+    <label>Quick House Buttons:</label>
+    <div class="expense-quick-grid">
+      <button class="exp-btn" onclick="setHouseItem('مصروف بيت')">مصروف بيت</button>
+      <button class="exp-btn" onclick="setHouseItem('كهرباء')">كهرباء</button>
+      <button class="exp-btn" onclick="setHouseItem('مياه بيت')">مياه بيت</button>
+      <button class="exp-btn" onclick="setHouseItem('سوبرماركت')">سوبرماركت</button>
+      <button class="exp-btn" onclick="setHouseItem('لحم ودجاج')">لحم ودجاج</button>
+      <button class="exp-btn" onclick="setHouseItem('خضار بيت')">خضار بيت</button>
+      <button class="exp-btn" onclick="setHouseItem('دواء وصحة')">دواء وصحة</button>
+      <button class="exp-btn" onclick="setHouseItem('بنزين سيارة')">بنزين سيارة</button>
+      <button class="exp-btn" onclick="setHouseItem('إنترنت بيت')">إنترنت بيت</button>
+      <button class="exp-btn" onclick="setHouseItem('أجار بيت')">أجار بيت</button>
+      <button class="exp-btn" onclick="setHouseItem('مصروف شخصي')">مصروف شخصي</button>
+      <button class="exp-btn" onclick="setHouseItem('طلبات طفلة')">طلبات طفلة</button>
+    </div>
+
+    <label>Details:</label>
+    <input type="text" id="house-notes" placeholder="Select above or type details...">
+
+    <div class="row" style="display:flex; gap:8px; margin-top:8px;">
+      <div style="flex:1;">
+        <label>Amount</label>
+        <input type="text" id="house-amount" placeholder="0" oninput="fixNumbers(this)">
+      </div>
+      <div style="flex:1;">
+        <label>Currency</label>
+        <select id="house-currency">
+          <option value="LBP">LBP (ليرة)</option>
+          <option value="USD">USD ($)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-save" onclick="saveHouseExpense()">💾 Save House Expense</button>
+  </div>
+
+  <!-- House Summary -->
+  <div class="card">
+    <h3>📊 House Summary</h3>
+    <div class="grid">
+      <div class="stat">
+        <div class="stat-title">Today Expenses</div>
+        <div id="house-today-usd" class="stat-usd">$0</div>
+        <div id="house-today-lbp" class="stat-lbp">0 LBP</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Month Expenses</div>
+        <div id="house-month-usd" class="stat-usd">$0</div>
+        <div id="house-month-lbp" class="stat-lbp">0 LBP</div>
+      </div>
+    </div>
+
+    <div id="house-report" class="report-box" style="margin-top: 12px;">
+      Loading house records...
+    </div>
+
+    <button class="btn-wa" onclick="shareHouseWhatsApp()">📲 Send House Report via WhatsApp</button>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://yjymshmonfhdfjegszbp.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_27rFxO5kcSht7s6befLZOg_meB3MQsy';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let globalHouseData = [];
+
+    function fixNumbers(inputElem) {
+      let str = inputElem.value;
+      const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+      for (let i = 0; i < 10; i++) {
+        str = str.replace(new RegExp(arabicDigits[i], 'g'), i);
+      }
+      inputElem.value = str;
+    }
+
+    function parseArabicNumber(val) {
+      if (!val) return 0;
+      let str = String(val);
+      const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+      for (let i = 0; i < 10; i++) {
+        str = str.replace(new RegExp(arabicDigits[i], 'g'), i);
+      }
+      return parseFloat(str) || 0;
+    }
+
+    function setHouseItem(itemName) {
+      document.getElementById('house-notes').value = itemName;
+      document.getElementById('house-amount').focus();
+    }
+
+    async function saveHouseExpense() {
+      const amountVal = parseArabicNumber(document.getElementById('house-amount').value);
+      const currency = document.getElementById('house-currency').value;
+      const notes = document.getElementById('house-notes').value || 'House Expense';
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+
+      if (!amountVal || amountVal <= 0) {
+        alert('Please enter a valid amount!');
+        return;
+      }
+
+      let amountUSD = currency === 'USD' ? amountVal : (amountVal / rate);
+      const d = new Date();
+      const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      const { error } = await supabaseClient
+        .from('house_expenses') // جدول منفصل خاص بالبيت
+        .insert([{ 
+          entry_date: todayFormatted, 
+          category: 'مصاريف بيت', 
+          amount: amountUSD, 
+          notes: `${notes} (${amountVal} ${currency})` 
+        }]);
+
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        alert('House expense saved successfully! ✅');
+        document.getElementById('house-amount').value = '';
+        document.getElementById('house-notes').value = '';
+        loadHouseData();
+      }
+    }
+
+    async function loadHouseData() {
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+      const { data, error } = await supabaseClient
+        .from('house_expenses')
+        .select('*')
+        .gte('entry_date', firstDay)
+        .lte('entry_date', lastDay)
+        .order('id', { ascending: false });
+
+      if (error) {
+        document.getElementById('house-report').innerHTML = 'Error loading house data. Make sure table exists.';
+        return;
+      }
+
+      let mTotal = 0;
+      let tTotal = 0;
+      let todayHtml = '';
+      globalHouseData = data || [];
+
+      globalHouseData.forEach(item => {
+        const amtUSD = Number(item.amount);
+        mTotal += amtUSD;
+
+        if (item.entry_date === todayStr) {
+          tTotal += amtUSD;
+          const lbpVal = Math.round(amtUSD * rate).toLocaleString();
+          todayHtml += `
+            <div class="report-item-compact">
+              <div><strong>📌 ${item.notes}</strong></div>
+              <div style="text-align:right; font-weight:bold; color:#dc2626;">
+                $${amtUSD.toFixed(2)} <br><span style="font-size:10px; color:#64748b;">${lbpVal} LBP</span>
+              </div>
+            </div>`;
+        }
+      });
+
+      document.getElementById('house-today-usd').innerText = '$' + tTotal.toFixed(2);
+      document.getElementById('house-today-lbp').innerText = Math.round(tTotal * rate).toLocaleString() + ' LBP';
+      document.getElementById('house-month-usd').innerText = '$' + mTotal.toFixed(2);
+      document.getElementById('house-month-lbp').innerText = Math.round(mTotal * rate).toLocaleString() + ' LBP';
+
+      document.getElementById('house-report').innerHTML = todayHtml || 'No expenses recorded for today.';
+    }
+
+    function shareHouseWhatsApp() {
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      let tTotal = 0;
+      let msg = `🏠 *House Expenses Report*\n📅 *Date:* ${todayStr}\n---------------------\n`;
+
+      globalHouseData.forEach(item => {
+        if (item.entry_date === todayStr) {
+          const amtUSD = Number(item.amount);
+          tTotal += amtUSD;
+          const lbpVal = Math.round(amtUSD * rate).toLocaleString();
+          msg += `• ${item.notes}: ${lbpVal} LBP ($${amtUSD.toFixed(2)})\n`;
+        }
+      });
+
+      msg += `---------------------\n`;
+      msg += `💰 *Total Today:* ${Math.round(tTotal * rate).toLocaleString()} LBP ($${tTotal.toFixed(2)})\n`;
+
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    loadHouseData();
+  </script>
+</body>
+</html>
