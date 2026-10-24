@@ -227,6 +227,18 @@
       justify-content: center;
       gap: 8px;
     }
+    .btn-reset {
+      width: 100%;
+      padding: 10px;
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 11px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
     .link-btn {
       text-align: center;
       margin-bottom: 14px;
@@ -324,9 +336,18 @@
     <button class="btn-save-exp" onclick="saveHouseExpense()">💾 Save Expense (تسجيل مصروف)</button>
   </div>
 
+  <!-- 📂 ARCHIVE & DATE HISTORY (خنة التاريخ) -->
+  <div class="card">
+    <h3>📂 Archive & Date History</h3>
+    <div class="row">
+      <label>Select Specific Date:</label>
+      <input type="date" id="archive-date" onchange="loadArchiveData()">
+    </div>
+  </div>
+
   <!-- 📊 HOUSE SUMMARY -->
   <div class="card">
-    <h3>📊 House Daily & Monthly Summary</h3>
+    <h3>📊 House Daily Summary</h3>
     <div class="grid">
       <div class="stat">
         <div class="stat-title">Total Income (قبض)</div>
@@ -351,6 +372,7 @@
     </div>
 
     <button class="btn-wa" onclick="shareHouseWhatsApp()">📲 Send House Report via WhatsApp</button>
+    <button class="btn-reset" onclick="resetTodayEntries()">🗑️ Reset & Delete Records for this Date</button>
   </div>
 
   <script>
@@ -359,6 +381,7 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalHouseData = [];
+    let globalTodayHouseData = [];
 
     function fixNumbers(inputElem) {
       let str = inputElem.value;
@@ -401,13 +424,12 @@
       }
 
       let amountUSD = currency === 'USD' ? amountVal : (amountVal / rate);
-      const d = new Date();
-      const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const selectedDate = document.getElementById('archive-date').value || new Date().toISOString().split('T')[0];
 
       const { error } = await supabaseClient
         .from('house_expenses')
         .insert([{ 
-          entry_date: todayFormatted, 
+          entry_date: selectedDate, 
           category: 'income', 
           amount: amountUSD, 
           notes: `${notes} (${amountVal} ${currency})` 
@@ -419,7 +441,7 @@
         alert('Income saved successfully! ✅');
         document.getElementById('income-amount').value = '';
         document.getElementById('income-notes').value = '';
-        loadHouseData();
+        loadHouseData(selectedDate);
       }
     }
 
@@ -435,13 +457,12 @@
       }
 
       let amountUSD = currency === 'USD' ? amountVal : (amountVal / rate);
-      const d = new Date();
-      const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const selectedDate = document.getElementById('archive-date').value || new Date().toISOString().split('T')[0];
 
       const { error } = await supabaseClient
         .from('house_expenses')
         .insert([{ 
-          entry_date: todayFormatted, 
+          entry_date: selectedDate, 
           category: 'expense', 
           amount: amountUSD, 
           notes: `${notes} (${amountVal} ${currency})` 
@@ -453,14 +474,44 @@
         alert('Expense saved successfully! ✅');
         document.getElementById('expense-amount').value = '';
         document.getElementById('expense-notes').value = '';
-        loadHouseData();
+        loadHouseData(selectedDate);
       }
     }
 
-    async function loadHouseData() {
+    async function loadArchiveData() {
+      const selectedDate = document.getElementById('archive-date').value;
+      if (!selectedDate) return;
+      loadHouseData(selectedDate);
+    }
+
+    async function resetTodayEntries() {
+      const selectedDate = document.getElementById('archive-date').value;
+      if (confirm(`Are you sure you want to delete all records for date (${selectedDate})?`)) {
+        const idsToDelete = globalTodayHouseData.map(item => item.id);
+        if (idsToDelete.length === 0) {
+          alert('No records to reset for this date!');
+          return;
+        }
+
+        const { error } = await supabaseClient
+          .from('house_expenses')
+          .delete()
+          .in('id', idsToDelete);
+
+        if (error) {
+          alert('Error resetting: ' + error.message);
+        } else {
+          alert('Successfully reset records for this date! ✅');
+          loadHouseData(selectedDate);
+        }
+      }
+    }
+
+    async function loadHouseData(targetDate) {
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const todayStr = targetDate || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      document.getElementById('archive-date').value = todayStr;
       
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
@@ -480,9 +531,11 @@
       let tInc = 0, tExp = 0;
       let todayHtml = '';
       globalHouseData = data || [];
+      globalTodayHouseData = [];
 
       globalHouseData.forEach(item => {
         if (item.entry_date === todayStr) {
+          globalTodayHouseData.push(item);
           const amtUSD = Number(item.amount);
           const isIncome = item.category === 'income';
           
@@ -515,28 +568,25 @@
       netElem.className = 'stat-usd ' + (tNet >= 0 ? 'income' : 'expense');
       document.getElementById('house-net-lbp').innerText = Math.round(tNet * rate).toLocaleString() + ' LBP';
 
-      document.getElementById('house-report').innerHTML = todayHtml || 'No records for today.';
+      document.getElementById('house-report').innerHTML = todayHtml || 'No records for this date.';
     }
 
     function shareHouseWhatsApp() {
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
-      const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const selectedDate = document.getElementById('archive-date').value;
 
       let tInc = 0, tExp = 0;
-      let msg = `🏠 *House Daily Report*\n📅 *Date:* ${todayStr}\n---------------------\n`;
+      let msg = `🏠 *House Daily Report*\n📅 *Date:* ${selectedDate}\n---------------------\n`;
 
-      globalHouseData.forEach(item => {
-        if (item.entry_date === todayStr) {
-          const amtUSD = Number(item.amount);
-          const isIncome = item.category === 'income';
-          if (isIncome) tInc += amtUSD;
-          else tExp += amtUSD;
+      globalTodayHouseData.forEach(item => {
+        const amtUSD = Number(item.amount);
+        const isIncome = item.category === 'income';
+        if (isIncome) tInc += amtUSD;
+        else tExp += amtUSD;
 
-          const lbpVal = Math.round(amtUSD * rate).toLocaleString();
-          const sign = isIncome ? '+' : '-';
-          msg += `${sign} ${item.notes}: ${lbpVal} LBP ($${amtUSD.toFixed(2)})\n`;
-        }
+        const lbpVal = Math.round(amtUSD * rate).toLocaleString();
+        const sign = isIncome ? '+' : '-';
+        msg += `${sign} ${item.notes}: ${lbpVal} LBP ($${amtUSD.toFixed(2)})\n`;
       });
 
       const tNet = tInc - tExp;
