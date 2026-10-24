@@ -84,7 +84,6 @@
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
     }
     
-    /* Menu Quick Grid */
     .menu-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -136,7 +135,6 @@
       border: 2px solid white;
     }
 
-    /* Expenses Quick Buttons */
     .expense-quick-grid {
       display: flex;
       flex-wrap: wrap;
@@ -534,6 +532,7 @@
     
     <label>Quick Expenses Buttons:</label>
     <div class="expense-quick-grid">
+      <button class="exp-btn" onclick="setExpenseItem('خبز')">خبز</button>
       <button class="exp-btn" onclick="setExpenseItem('سمنة')">سمنة</button>
       <button class="exp-btn" onclick="setExpenseItem('لبن')">لبن</button>
       <button class="exp-btn" onclick="setExpenseItem('طحينة')">طحينة</button>
@@ -578,7 +577,6 @@
       <button class="exp-btn" onclick="setExpenseItem('مازوت')">مازوت</button>
       <button class="exp-btn" onclick="setExpenseItem('كياس نفايات')">كياس نفايات</button>
       <button class="exp-btn" onclick="setExpenseItem('أوردر دليفري')">أوردر دليفري</button>
-  <button class="exp-btn" onclick="setExpenseItem('خبز')">خبز </button>
     </div>
 
     <label>Expense Details:</label>
@@ -684,7 +682,7 @@
       Loading data...
     </div>
 
-    <button class="btn-wa" onclick="shareReportWhatsApp()">📲 Send Daily Report via WhatsApp</button>
+    <button class="btn-wa" onclick="shareReportWhatsApp()">📲 Send Current Tab Report via WhatsApp</button>
     <button class="btn-reset" onclick="resetTodayEntries()">🗑️ Reset & Delete All Daily Records</button>
   </div>
 
@@ -1004,7 +1002,6 @@
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       const selectedDate = document.getElementById('archive-date').value || new Date().toISOString().split('T')[0];
 
-      // جلب البيانات المفلترة حسب الـ Tab المفتوح حالياً
       const filtered = getFilteredReportData();
 
       if (filtered.length === 0) {
@@ -1012,7 +1009,6 @@
         return;
       }
 
-      // تحديد عنوان التقرير حسب الـ Tab
       let tabTitle = "All Transactions";
       if (currentReportFilter === 'sales') tabTitle = "Sales Only";
       if (currentReportFilter === 'expenses') tabTitle = "Expenses Only";
@@ -1023,7 +1019,6 @@
       msg += `📅 *Date:* ${selectedDate}\n`;
       msg += `---------------------\n`;
 
-      // إضافة العناصر المفلترة فقط
       filtered.forEach(item => {
         const amtUSD = Number(item.amount);
         const sign = item.type === 'income' ? '+' : '-';
@@ -1182,17 +1177,21 @@
       renderFilteredReport();
     }
 
+    function getFilteredReportData() {
+      return globalTodayData.filter(item => {
+        if (currentReportFilter === 'all') return true;
+        if (currentReportFilter === 'sales') return item.type === 'income' && !item.category.includes('معلق:');
+        if (currentReportFilter === 'expenses') return item.type === 'expense';
+        if (currentReportFilter === 'sections') return item.type === 'income' && !item.category.includes('معلق:') && (item.category.includes('صالة') || item.category.includes('تيك أواي') || item.category.includes('دليفري'));
+        return true;
+      });
+    }
+
     function renderFilteredReport() {
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       let todayHtml = '';
 
-      const filtered = globalTodayData.filter(item => {
-        if (currentReportFilter === 'all') return true;
-        if (currentReportFilter === 'sales') return item.type === 'income' && !item.category.includes('معلق:');
-        if (currentReportFilter === 'expenses') return item.type === 'expense';
-        if (currentReportFilter === 'sections') return item.type === 'income' && (item.category.includes('صالة') || item.category.includes('تيك أواي') || item.category.includes('دليفري'));
-        return true;
-      });
+      const filtered = getFilteredReportData();
 
       if (filtered.length === 0) {
         document.getElementById('today-report').innerHTML = 'No records found.';
