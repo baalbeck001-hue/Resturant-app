@@ -133,7 +133,6 @@
       color: #1d4ed8;
     }
 
-    /* أزرار الفلترة للتقارير */
     .report-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-top: 8px; margin-bottom: 8px; }
     .tab-btn {
       padding: 8px 2px;
@@ -364,7 +363,6 @@
   <div class="card">
     <h3>📊 التقارير والتفاصيل</h3>
     
-    <!-- أزرار اختيار التقرير -->
     <div class="report-tabs">
       <div class="tab-btn active" id="tab-all" onclick="filterReport('all')">📋 الكل</div>
       <div class="tab-btn" id="tab-sales" onclick="filterReport('sales')">🛍️ المبيعات</div>
@@ -375,6 +373,9 @@
     <div id="today-report" class="report-box">
       جاري التحميل...
     </div>
+
+    <!-- زر إرسال التقرير المختار للواتساب -->
+    <button class="btn-wa" onclick="shareReportWhatsApp()">📲 إرسال هذا التقرير عبر واتساب</button>
   </div>
 
   <!-- الزر العائم لفتح الفاتورة -->
@@ -543,6 +544,54 @@
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
     }
 
+    // إرسال تقرير اليوم الحالي عبر واتساب
+    function shareReportWhatsApp() {
+      if (globalTodayData.length === 0) {
+        alert('لا توجد حركات مسجلة اليوم إطلاقاً!');
+        return;
+      }
+
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      let title = "📋 *تقرير اليوم الشامل*";
+      if (currentReportFilter === 'sales') title = "🛍️ *تقرير المبيعات والطلبات*";
+      if (currentReportFilter === 'expenses') title = "💸 *تقرير المصاريف والدفعات*";
+      if (currentReportFilter === 'sections') title = "📍 *تقرير مبيعات الأقسام*";
+
+      let msg = `${title}\n📅 *التاريخ:* ${todayStr}\n---------------------\n`;
+      let filterTotalUSD = 0;
+
+      const filtered = globalTodayData.filter(item => {
+        if (currentReportFilter === 'all') return true;
+        if (currentReportFilter === 'sales') return item.type === 'income';
+        if (currentReportFilter === 'expenses') return item.type === 'expense';
+        if (currentReportFilter === 'sections') return item.type === 'income' && (item.category.includes('صالة') || item.category.includes('تيك أواي') || item.category.includes('دليفري'));
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        alert('لا توجد حركات ضمن هذا التقرير!');
+        return;
+      }
+
+      filtered.forEach(item => {
+        const amtUSD = Number(item.amount);
+        filterTotalUSD += (item.type === 'income' ? amtUSD : -amtUSD);
+        const sign = item.type === 'income' ? '+' : '-';
+        const lbpValue = Math.round(amtUSD * rate).toLocaleString();
+        msg += `• ${item.category}: ${sign}${lbpValue} LBP ($${amtUSD.toFixed(2)})\n  _${item.notes || ''}_\n`;
+      });
+
+      msg += `---------------------\n`;
+      const netLBP = Math.round(filterTotalUSD * rate).toLocaleString();
+      msg += `📊 *إجمالي التقرير:* ${netLBP} LBP ($${filterTotalUSD.toFixed(2)})\n`;
+
+      const encodedMsg = encodeURIComponent(msg);
+      window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+    }
+
     async function saveOrder() {
       if (cart.length === 0) {
         alert('الرجاء اختيار وجبات أولاً!');
@@ -645,7 +694,6 @@
       }
     }
 
-    // فلترة التقارير
     function filterReport(type) {
       currentReportFilter = type;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
