@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>نظام مبيعات المطعم</title>
+  <title>حسابات المطعم السريعة</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -19,7 +19,7 @@
       background: var(--bg);
       margin: 0;
       padding: 10px;
-      padding-bottom: 90px; /* مساحة للزر العائم بالأسفل */
+      padding-bottom: 90px;
       direction: rtl;
       color: var(--text);
     }
@@ -29,7 +29,6 @@
     label { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 4px; display: block; }
     input, select { width: 100%; padding: 10px; margin-top: 3px; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #f8fafc; font-weight: 600; }
     
-    /* شبكة كبسات المنيو */
     .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
     .menu-btn {
       position: relative;
@@ -50,7 +49,6 @@
     .menu-name { font-weight: bold; font-size: 14px; color: #166534; }
     .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; }
     
-    /* شارة العدّاد على الزر نفسه */
     .badge {
       position: absolute;
       top: -6px;
@@ -70,7 +68,6 @@
       display: none;
     }
 
-    /* الزر العائم لفتح الفاتورة بالأسفل */
     .floating-cart-bar {
       position: fixed;
       bottom: 15px;
@@ -90,7 +87,6 @@
       display: none;
     }
 
-    /* الـ Popup Modal للفاتورة */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -121,7 +117,6 @@
       direction: rtl;
     }
 
-    /* أزرار نوع الطلب (صالة / دليفري / سفري) */
     .order-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; }
     .type-btn {
       padding: 10px 4px;
@@ -186,75 +181,70 @@
   <div class="card">
     <h3 style="color: #047857;">⚡ اختر الوجبات للفاتورة</h3>
     <div class="menu-grid">
-      <div class="menu-btn" id="btn-فول" onclick="addToCart('فول', 40000)">
+      <div class="menu-btn" id="btn-فول" onclick="addToCart('فول', 400000)">
         <div class="badge" id="badge-فول">0</div>
         <div class="menu-name">فول</div>
-        <div class="menu-price">40,000 LBP</div>
+        <div class="menu-price">400,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-بليلة" onclick="addToCart('بليلة', 40000)">
+      <div class="menu-btn" id="btn-بليلة" onclick="addToCart('بليلة', 400000)">
         <div class="badge" id="badge-بليلة">0</div>
         <div class="menu-name">بليلة</div>
-        <div class="menu-price">40,000 LBP</div>
+        <div class="menu-price">400,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-مسبحة" onclick="addToCart('مسبحة', 40000)">
+      <div class="menu-btn" id="btn-مسبحة" onclick="addToCart('مسبحة', 400000)">
         <div class="badge" id="badge-مسبحة">0</div>
         <div class="menu-name">مسبحة</div>
-        <div class="menu-price">40,000 LBP</div>
+        <div class="menu-price">400,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-حمص مطحون" onclick="addToCart('حمص مطحون', 40000)">
+      <div class="menu-btn" id="btn-حمص مطحون" onclick="addToCart('حمص مطحون', 400000)">
         <div class="badge" id="badge-حمص مطحون">0</div>
         <div class="menu-name">حمص مطحون</div>
-        <div class="menu-price">40,000 LBP</div>
+        <div class="menu-price">400,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة" onclick="addToCart('فتة', 45000)">
+      <div class="menu-btn" id="btn-فتة" onclick="addToCart('فتة', 450000)">
         <div class="badge" id="badge-فتة">0</div>
         <div class="menu-name">فتة</div>
-        <div class="menu-price">45,000 LBP</div>
+        <div class="menu-price">450,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة اكسترا" onclick="addToCart('فتة اكسترا', 55000)">
+      <div class="menu-btn" id="btn-فتة اكسترا" onclick="addToCart('فتة اكسترا', 550000)">
         <div class="badge" id="badge-فتة اكسترا">0</div>
         <div class="menu-name">فتة اكسترا</div>
-        <div class="menu-price">55,000 LBP</div>
+        <div class="menu-price">550,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة لسانات" onclick="addToCart('فتة لسانات', 70000)">
+      <div class="menu-btn" id="btn-فتة لسانات" onclick="addToCart('فتة لسانات', 700000)">
         <div class="badge" id="badge-فتة لسانات">0</div>
         <div class="menu-name">فتة لسانات</div>
-        <div class="menu-price">70,000 LBP</div>
+        <div class="menu-price">700,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة مقادم" onclick="addToCart('فتة مقادم', 70000)">
+      <div class="menu-btn" id="btn-فتة مقادم" onclick="addToCart('فتة مقادم', 700000)">
         <div class="badge" id="badge-فتة مقادم">0</div>
         <div class="menu-name">فتة مقادم</div>
-        <div class="menu-price">70,000 LBP</div>
+        <div class="menu-price">700,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة عصب" onclick="addToCart('فتة عصب', 70000)">
+      <div class="menu-btn" id="btn-فتة عصب" onclick="addToCart('فتة عصب', 700000)">
         <div class="badge" id="badge-فتة عصب">0</div>
         <div class="menu-name">فتة عصب</div>
-        <div class="menu-price">70,000 LBP</div>
+        <div class="menu-price">700,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-بيض مع قوارما" onclick="addToCart('بيض مع قوارما', 60000)">
+      <div class="menu-btn" id="btn-بيض مع قوارما" onclick="addToCart('بيض مع قوارما', 600000)">
         <div class="badge" id="badge-بيض مع قوارما">0</div>
         <div class="menu-name">بيض مع قوارما</div>
-        <div class="menu-price">60,000 LBP</div>
+        <div class="menu-price">600,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-حمص بلحمة" onclick="addToCart('حمص بلحمة', 60000)">
+      <div class="menu-btn" id="btn-حمص بلحمة" onclick="addToCart('حمص بلحمة', 600000)">
         <div class="badge" id="badge-حمص بلحمة">0</div>
         <div class="menu-name">حمص بلحمة</div>
-        <div class="menu-price">60,000 LBP</div>
+        <div class="menu-price">600,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-فتة لحمة" onclick="addToCart('فتة لحمة', 65000)">
+      <div class="menu-btn" id="btn-فتة لحمة" onclick="addToCart('فتة لحمة', 650000)">
         <div class="badge" id="badge-فتة لحمة">0</div>
         <div class="menu-name">فتة لحمة</div>
-        <div class="menu-price">65,000 LBP</div>
+        <div class="menu-price">650,000 LBP</div>
       </div>
-      <div class="menu-btn" id="btn-مرطبات" onclick="addToCart('مرطبات', 15000)">
+      <div class="menu-btn" id="btn-مرطبات" onclick="addToCart('مرطبات', 50000)">
         <div class="badge" id="badge-مرطبات">0</div>
         <div class="menu-name">مرطبات</div>
-        <div class="menu-price">15,000 LBP</div>
-      </div>
-      <div class="menu-btn" id="btn-مياه" onclick="addToCart('مياه', 10000)">
-        <div class="badge" id="badge-مياه">0</div>
-        <div class="menu-name">مياه</div>
-        <div class="menu-price">10,000 LBP</div>
+        <div class="menu-price">50,000 LBP</div>
       </div>
     </div>
   </div>
@@ -416,7 +406,6 @@
     }
 
     function renderCart() {
-      // 1. تحديث الـ Badges فوق كل كبسة بالمنيو
       const allBadges = document.querySelectorAll('.badge');
       allBadges.forEach(b => {
         b.innerText = '0';
@@ -437,8 +426,7 @@
         }
       });
 
-      // 2. تحديث الزر العائم بالأسفل
-      const floatBtn = document.getElementById('floating-cart-btn');
+      const floatBtn = document.getElementById('floating-cart-bar');
       if (totalItemsCount > 0) {
         floatBtn.style.display = 'flex';
         document.getElementById('float-count').innerText = totalItemsCount;
@@ -447,10 +435,9 @@
         floatBtn.style.display = 'none';
       }
 
-      // 3. تحديث محتوى الـ Modal
       const container = document.getElementById('cart-items');
       if (cart.length === 0) {
-        container.innerHTML = 'لا توجد وجبات مضافة بالفاتورة.';
+        container.innerHTML = 'لا توجد وجبات بالفاتورة.';
       } else {
         let html = '';
         cart.forEach(item => {
