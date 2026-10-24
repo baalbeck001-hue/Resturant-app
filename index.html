@@ -145,9 +145,26 @@
       border: none;
       border-radius: 12px;
       font-weight: 800;
-      font-size: 16px;
-      margin-top: 12px;
+      font-size: 15px;
+      margin-top: 10px;
       cursor: pointer;
+    }
+
+    .btn-wa {
+      width: 100%;
+      padding: 12px;
+      background: #25d366;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 14px;
+      margin-top: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
@@ -159,8 +176,10 @@
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
 
-    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 180px; overflow-y: auto; }
-    .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 6px 0; font-size: 12px; }
+    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 220px; overflow-y: auto; }
+    .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 8px 0; font-size: 12px; }
+    .btn-del { background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer; margin-right: 6px; }
+    
     .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: bold; color: #78350f; }
     .rate-box input { width: 90px; padding: 3px 6px; font-size: 12px; text-align: center; margin: 0; }
   </style>
@@ -169,11 +188,13 @@
 
   <div class="header">🍽️ إدارة طلبات وحسابات المطعم</div>
 
+  <!-- سعر الصرف -->
   <div class="rate-box">
     <span>سعر الصرف ($1 = LBP):</span>
     <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
+  <!-- لوحة المنيو السريع -->
   <div class="card">
     <h3 style="color: #047857;">⚡ اختر الوجبات للفاتورة</h3>
     <div class="menu-grid">
@@ -245,6 +266,7 @@
     </div>
   </div>
 
+  <!-- تسجيل مصروف يدوي -->
   <div class="card">
     <h3>💸 تسجيل مصروف (مشتريات/فواتير)</h3>
     <div class="row" style="display:flex; gap:6px;">
@@ -265,6 +287,7 @@
     <button onclick="saveExpense()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; margin-top:8px; cursor:pointer;">💾 حفظ المصروف</button>
   </div>
 
+  <!-- ملخص اليوم -->
   <div class="card">
     <h3>☀️ ملخص اليوم</h3>
     <div class="grid">
@@ -284,8 +307,25 @@
       <div id="today-net-usd" class="stat-usd">$0</div>
       <div id="today-net-lbp" class="stat-lbp">0 LBP</div>
     </div>
+    
+    <!-- تفكيك أقسام مبيعات اليوم -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:8px; font-size:10px; text-align:center;">
+      <div style="background:#eff6ff; padding:6px; border-radius:8px; border:1px solid #bfdbfe;">
+        <div style="color:#1d4ed8; font-weight:bold;">🏠 صالة</div>
+        <div id="type-hall-total" style="font-weight:800; color:#1e40af; margin-top:2px;">0 LBP</div>
+      </div>
+      <div style="background:#fefce8; padding:6px; border-radius:8px; border:1px solid #fef08a;">
+        <div style="color:#a16207; font-weight:bold;">🛍️ سفري</div>
+        <div id="type-takeaway-total" style="font-weight:800; color:#854d0e; margin-top:2px;">0 LBP</div>
+      </div>
+      <div style="background:#f0fdf4; padding:6px; border-radius:8px; border:1px solid #bbf7d0;">
+        <div style="color:#15803d; font-weight:bold;">🛵 دليفري</div>
+        <div id="type-delivery-total" style="font-weight:800; color:#166534; margin-top:2px;">0 LBP</div>
+      </div>
+    </div>
   </div>
 
+  <!-- ملخص الشهر -->
   <div class="card">
     <h3>📅 ملخص الشهر الحالي</h3>
     <div class="grid">
@@ -307,6 +347,7 @@
     </div>
   </div>
 
+  <!-- تفاصيل حركات اليوم -->
   <div class="card">
     <h3>🔍 حركات اليوم التفصيلية</h3>
     <div id="today-report" class="report-box">
@@ -314,6 +355,7 @@
     </div>
   </div>
 
+  <!-- الزر العائم لفتح الفاتورة -->
   <div class="floating-cart-bar" onclick="openModal()">
     <div style="display:flex; align-items:center; gap:8px;">
       <span style="font-size:18px;">🛒</span>
@@ -322,6 +364,7 @@
     <div id="float-total-lbp" style="font-size:16px;">0 LBP</div>
   </div>
 
+  <!-- نافذة POPUP الفاتورة -->
   <div class="modal-overlay" id="cart-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -346,6 +389,7 @@
       </div>
 
       <button class="btn-save" id="save-order-btn" onclick="saveOrder()">✅ حفظ الفاتورة بالحسابات</button>
+      <button class="btn-wa" onclick="shareWhatsApp()">📲 إرسال الفاتورة عبر واتساب</button>
       <button onclick="clearCart(); closeModal();" style="width:100%; background:none; border:none; color:#dc2626; font-size:12px; font-weight:bold; margin-top:8px; cursor:pointer;">🗑️ تفريغ الفاتورة وإلغاء</button>
     </div>
   </div>
@@ -450,6 +494,32 @@
       document.getElementById('cart-modal').classList.remove('active');
     }
 
+    // إرسال الفاتورة للواتساب
+    function shareWhatsApp() {
+      if (cart.length === 0) {
+        alert('الفاتورة فارغة!');
+        return;
+      }
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      let totalLBP = 0;
+      let msg = `🍽️ *فاتورة مطعم*\n`;
+      msg += `📍 *نوع الطلب:* ${currentOrderType}\n`;
+      msg += `---------------------\n`;
+
+      cart.forEach(item => {
+        const itemTotal = item.priceLBP * item.qty;
+        totalLBP += itemTotal;
+        msg += `• ${item.name} (x${item.qty}) = ${itemTotal.toLocaleString()} LBP\n`;
+      });
+
+      const totalUSD = (totalLBP / rate).toFixed(2);
+      msg += `---------------------\n`;
+      msg += `💰 *المجموع:* ${totalLBP.toLocaleString()} LBP ($${totalUSD})\n`;
+
+      const encodedMsg = encodeURIComponent(msg);
+      window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+    }
+
     async function saveOrder() {
       if (cart.length === 0) {
         alert('الرجاء اختيار وجبات أولاً!');
@@ -499,6 +569,22 @@
       } finally {
         btn.innerText = '✅ حفظ الفاتورة بالحسابات';
         btn.disabled = false;
+      }
+    }
+
+    // حذف حركة من Supabase
+    async function deleteEntry(id) {
+      if (confirm('هل أنت تأكد من حذف هذه الحركة؟')) {
+        const { error } = await supabaseClient
+          .from('restaurant_expenses')
+          .delete()
+          .eq('id', id);
+
+        if (error) {
+          alert('خطأ بالحذف: ' + error.message);
+        } else {
+          loadData();
+        }
       }
     }
 
@@ -558,6 +644,7 @@
 
       let mInc = 0, mExp = 0;
       let tInc = 0, tExp = 0;
+      let hallTotal = 0, takeawayTotal = 0, deliveryTotal = 0;
       let todayHtml = '';
 
       if (data) {
@@ -568,7 +655,12 @@
           if (item.type === 'expense') mExp += amtUSD;
 
           if (item.entry_date === todayStr) {
-            if (item.type === 'income') tInc += amtUSD;
+            if (item.type === 'income') {
+              tInc += amtUSD;
+              if (item.category.includes('داخل المطعم')) hallTotal += (amtUSD * rate);
+              else if (item.category.includes('تيك أواي')) takeawayTotal += (amtUSD * rate);
+              else if (item.category.includes('دليفري')) deliveryTotal += (amtUSD * rate);
+            }
             if (item.type === 'expense') tExp += amtUSD;
 
             const color = item.type === 'income' ? 'income' : 'expense';
@@ -577,9 +669,12 @@
             
             todayHtml += `
               <div class="report-item">
-                <div>
-                  <strong>📌 ${item.category}</strong>
-                  <div style="font-size:10px; color:#64748b;">${item.notes || ''}</div>
+                <div style="display:flex; align-items:center;">
+                  <button class="btn-del" onclick="deleteEntry(${item.id})">🗑️</button>
+                  <div>
+                    <strong>📌 ${item.category}</strong>
+                    <div style="font-size:10px; color:#64748b;">${item.notes || ''}</div>
+                  </div>
                 </div>
                 <div style="text-align:left;">
                   <div class="${color}" style="font-weight:bold;">${sign}$${amtUSD.toFixed(2)}</div>
@@ -594,6 +689,10 @@
         document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
         document.getElementById('today-exp-lbp').innerText = Math.round(tExp * rate).toLocaleString() + ' LBP';
         
+        document.getElementById('type-hall-total').innerText = Math.round(hallTotal).toLocaleString() + ' LBP';
+        document.getElementById('type-takeaway-total').innerText = Math.round(takeawayTotal).toLocaleString() + ' LBP';
+        document.getElementById('type-delivery-total').innerText = Math.round(deliveryTotal).toLocaleString() + ' LBP';
+
         const tNet = tInc - tExp;
         const tNetElem = document.getElementById('today-net-usd');
         tNetElem.innerText = '$' + tNet.toFixed(2);
