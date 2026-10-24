@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>حسابات المطعم</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root { --primary: #10b981; --danger: #ef4444; --bg: #f3f4f6; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; direction: rtl; }
+    .card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    h2, h3 { margin-top: 0; color: #1f2937; text-align: center; }
+    label { font-size: 14px; color: #4b5563; font-weight: bold; margin-top: 8px; display: block; }
+    input, select { width: 100%; padding: 12px; margin-top: 4px; border: 1px solid #d1d5db; border-radius: 10px; box-sizing: border-box; font-size: 16px; background: #fff; }
+    button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 15px; cursor: pointer; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat { text-align: center; padding: 10px; border-radius: 10px; background: #f9fafb; }
+    .stat-val { font-size: 18px; font-weight: bold; margin-top: 4px; }
+    .income { color: var(--primary); }
+    .expense { color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>تسجيل حركة اليوم</h2>
+    <label>التاريخ</label>
+    <input type="date" id="entry_date">
+
+    <label>نوع الحركة</label>
+    <select id="type">
+      <option value="income">مبيعات / مداخيل (+)</option>
+      <option value="expense">مصاريف / مشتريات (-)</option>
+    </select>
+
+    <label>الفئة</label>
+    <select id="category">
+      <option value="مبيعات">مبيعات اليوم</option>
+      <option value="خضار ولحوم">خضار ولحوم</option>
+      <option value="بضاعة ومواد">بضاعة ومواد</option>
+      <option value="رواتب وأجور">رواتب وأجور</option>
+      <option value="فواتير ونثريات">فواتير ونثريات</option>
+      <option value="أخرى">أخرى</option>
+    </select>
+
+    <label>المبلغ</label>
+    <input type="number" id="amount" placeholder="0.00">
+
+    <label>ملاحظات</label>
+    <input type="text" id="notes" placeholder="مثال: فاتورة لحمة...">
+
+    <button onclick="saveEntry()">حفظ في الحسابات</button>
+  </div>
+
+  <div class="card">
+    <h3>ملخص الشهر الحالي</h3>
+    <div class="grid">
+      <div class="stat">
+        <div>المبيعات</div>
+        <div id="total-income" class="stat-val income">0</div>
+      </div>
+      <div class="stat">
+        <div>المصاريف</div>
+        <div id="total-expense" class="stat-val expense">0</div>
+      </div>
+    </div>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+    <div class="stat">
+      <div>صافي الربح / الخسارة</div>
+      <div id="net-profit" class="stat-val">0</div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://yjymshmonfhdfjegszbp.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_27rFxO5kcSht7s6befLZOg_meB3MQsy';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    document.getElementById('entry_date').valueAsDate = new Date();
+
+    async function saveEntry() {
+      const entry_date = document.getElementById('entry_date').value;
+      const type = document.getElementById('type').value;
+      const category = document.getElementById('category').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const notes = document.getElementById('notes').value;
+
+      if (!amount) return alert('الرجاء أدخل المبلغ');
+
+      const { data, error } = await supabase
+        .from('restaurant_expenses')
+        .insert([{ entry_date, type, category, amount, notes }]);
+
+      if (error) {
+        alert('حدث خطأ أثناء الحفظ: ' + error.message);
+      } else {
+        alert('تم الحفظ بنجاح!');
+        document.getElementById('amount').value = '';
+        document.getElementById('notes').value = '';
+        loadSummary();
+      }
+    }
+
+    async function loadSummary() {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+      const { data, error } = await supabase
+        .from('restaurant_expenses')
+        .select('*')
+        .gte('entry_date', firstDay)
+        .lte('entry_date', lastDay);
+
+      if (data) {
+        let income = 0, expense = 0;
+        data.forEach(item => {
+          if (item.type === 'income') income += Number(item.amount);
+          if (item.type === 'expense') expense += Number(item.amount);
+        });
+
+        document.getElementById('total-income').innerText = income.toLocaleString();
+        document.getElementById('total-expense').innerText = expense.toLocaleString();
+        const net = income - expense;
+        const netElem = document.getElementById('net-profit');
+        netElem.innerText = net.toLocaleString();
+        netElem.style.color = net >= 0 ? '#10b981' : '#ef4444';
+      }
+    }
+
+    loadSummary();
+  </script>
+</body>
+</html>
