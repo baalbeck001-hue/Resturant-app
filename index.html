@@ -1004,26 +1004,36 @@
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       const selectedDate = document.getElementById('archive-date').value || new Date().toISOString().split('T')[0];
 
-      let tInc = 0;
-      let tExp = 0;
+      // جلب البيانات المفلترة حسب الـ Tab المفتوح حالياً
+      const filtered = getFilteredReportData();
 
-      globalTodayData.forEach(item => {
-        if (!item.category.includes('معلق:')) {
-          const amtUSD = Number(item.amount);
-          if (item.type === 'income') tInc += amtUSD;
-          if (item.type === 'expense') tExp += amtUSD;
-        }
-      });
+      if (filtered.length === 0) {
+        alert('No data to share for this tab!');
+        return;
+      }
 
-      const tNet = tInc - tExp;
+      // تحديد عنوان التقرير حسب الـ Tab
+      let tabTitle = "All Transactions";
+      if (currentReportFilter === 'sales') tabTitle = "Sales Only";
+      if (currentReportFilter === 'expenses') tabTitle = "Expenses Only";
+      if (currentReportFilter === 'sections') tabTitle = "Sections Breakdown";
 
-      let msg = `📊 *Daily Register Report*\n`;
+      let totalUSD = 0;
+      let msg = `📊 *${tabTitle} Report*\n`;
       msg += `📅 *Date:* ${selectedDate}\n`;
       msg += `---------------------\n`;
-      msg += `🛍️ *Total Sales:* ${Math.round(tInc * rate).toLocaleString()} LBP ($${tInc.toFixed(2)})\n`;
-      msg += `💸 *Total Expenses:* ${Math.round(tExp * rate).toLocaleString()} LBP ($${tExp.toFixed(2)})\n`;
+
+      // إضافة العناصر المفلترة فقط
+      filtered.forEach(item => {
+        const amtUSD = Number(item.amount);
+        const sign = item.type === 'income' ? '+' : '-';
+        const lbpVal = Math.round(amtUSD * rate).toLocaleString();
+        totalUSD += (item.type === 'income' ? amtUSD : -amtUSD);
+        msg += `${sign} ${item.category}: ${lbpVal} LBP ($${amtUSD.toFixed(2)})\n`;
+      });
+
       msg += `---------------------\n`;
-      msg += `💵 *Net Remaining:* ${Math.round(tNet * rate).toLocaleString()} LBP ($${tNet.toFixed(2)})\n`;
+      msg += `💰 *Total Amount:* ${Math.round(totalUSD * rate).toLocaleString()} LBP ($${totalUSD.toFixed(2)})\n`;
 
       const encodedMsg = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
