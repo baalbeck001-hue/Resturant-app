@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>حسابات المطعم السريعة</title>
+  <title>نظام مبيعات المطعم</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -22,13 +22,13 @@
       direction: rtl;
       color: var(--text);
     }
-    .header { text-align: center; padding: 6px 0; font-weight: 800; font-size: 18px; color: #1e293b; }
+    .header { text-align: center; padding: 4px 0; font-weight: 800; font-size: 18px; color: #1e293b; }
     .card { background: var(--card-bg); padding: 12px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 10px; border: 1px solid #e2e8f0; }
     h3 { margin: 0 0 8px 0; color: #334155; font-size: 15px; display: flex; align-items: center; gap: 6px; }
     label { font-size: 11px; color: #64748b; font-weight: 700; margin-top: 4px; display: block; }
     input, select { width: 100%; padding: 10px; margin-top: 3px; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #f8fafc; font-weight: 600; }
     
-    /* شبكة كبسات المنيو السريع */
+    /* شبكة كبسات المنيو */
     .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
     .menu-btn {
       background: #f0fdf4;
@@ -44,17 +44,42 @@
     .menu-name { font-weight: bold; font-size: 13px; color: #166534; }
     .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; }
 
+    /* أزرار نوع الطلب (صالة / دليفري / سفري) */
+    .order-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+    .type-btn {
+      padding: 10px 4px;
+      border: 2px solid #cbd5e1;
+      background: #f1f5f9;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      color: #475569;
+    }
+    .type-btn.active {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    /* الفاتورة الحالية (السلة) */
+    .cart-box { background: #fff8f1; border: 2px dashed #f97316; padding: 10px; border-radius: 12px; margin-top: 8px; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fed7aa; padding: 6px 0; font-size: 13px; }
+    .cart-total { text-align: center; margin-top: 8px; padding-top: 8px; border-top: 2px solid #f97316; font-weight: bold; }
+
     .btn-save {
       width: 100%;
       padding: 12px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
       color: white;
       border: none;
       border-radius: 10px;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 16px;
       margin-top: 10px;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
     }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
@@ -66,7 +91,7 @@
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
 
-    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 180px; overflow-y: auto; }
+    .report-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; margin-top: 6px; max-height: 200px; overflow-y: auto; }
     .report-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 6px 0; font-size: 12px; }
     .rate-box { background: #fef3c7; border: 1px solid #fde047; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: bold; color: #78350f; }
     .rate-box input { width: 90px; padding: 3px 6px; font-size: 12px; text-align: center; margin: 0; }
@@ -74,7 +99,7 @@
 </head>
 <body>
 
-  <div class="header">🍽️ حسابات المطعم السريعة</div>
+  <div class="header">🍽️ إدارة طلبات وحسابات المطعم</div>
 
   <!-- سعر الصرف -->
   <div class="rate-box">
@@ -82,101 +107,117 @@
     <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
+  <!-- اختيار نوع الطلب -->
+  <div class="card">
+    <h3>📍 قسم / نوع الطلب</h3>
+    <div class="order-type-grid">
+      <div class="type-btn active" id="type-hall" onclick="setOrderType('داخل المطعم')">🏠 صالة</div>
+      <div class="type-btn" id="type-takeaway" onclick="setOrderType('تيك أواي')">🛍️ سفري</div>
+      <div class="type-btn" id="type-delivery" onclick="setOrderType('دليفري')">🛵 دليفري</div>
+    </div>
+  </div>
+
   <!-- لوحة المنيو السريع -->
-  <div class="card" style="background: #fdfefe; border: 2px solid #10b981;">
-    <h3 style="color: #047857;">⚡ مبيعات سريعة (كبسة وحدة)</h3>
+  <div class="card">
+    <h3 style="color: #047857;">⚡ اختر الوجبات للفاتورة</h3>
     <div class="menu-grid">
-      <div class="menu-btn" onclick="quickSale('فول', 40000)">
+      <div class="menu-btn" onclick="addToCart('فول', 40000)">
         <div class="menu-name">فول</div>
-        <div class="menu-price">40,000 ليرة</div>
+        <div class="menu-price">40,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('بليلة', 40000)">
+      <div class="menu-btn" onclick="addToCart('بليلة', 40000)">
         <div class="menu-name">بليلة</div>
-        <div class="menu-price">40,000 ليرة</div>
+        <div class="menu-price">40,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('مسبحة', 40000)">
+      <div class="menu-btn" onclick="addToCart('مسبحة', 40000)">
         <div class="menu-name">مسبحة</div>
-        <div class="menu-price">40,000 ليرة</div>
+        <div class="menu-price">40,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('حمص مطحون', 40000)">
+      <div class="menu-btn" onclick="addToCart('حمص مطحون', 40000)">
         <div class="menu-name">حمص مطحون</div>
-        <div class="menu-price">40,000 ليرة</div>
+        <div class="menu-price">40,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('فتة', 45000)">
+      <div class="menu-btn" onclick="addToCart('فتة', 45000)">
         <div class="menu-name">فتة</div>
-        <div class="menu-price">45,000 ليرة</div>
+        <div class="menu-price">45,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('فتة اكسترا', 55000)">
+      <div class="menu-btn" onclick="addToCart('فتة اكسترا', 55000)">
         <div class="menu-name">فتة اكسترا</div>
-        <div class="menu-price">55,000 ليرة</div>
+        <div class="menu-price">55,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('فتة لسانات', 70000)">
+      <div class="menu-btn" onclick="addToCart('فتة لسانات', 70000)">
         <div class="menu-name">فتة لسانات</div>
-        <div class="menu-price">70,000 ليرة</div>
+        <div class="menu-price">70,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('فتة مقادم', 70000)">
+      <div class="menu-btn" onclick="addToCart('فتة مقادم', 70000)">
         <div class="menu-name">فتة مقادم</div>
-        <div class="menu-price">70,000 ليرة</div>
+        <div class="menu-price">70,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('فتة عصب', 70000)">
+      <div class="menu-btn" onclick="addToCart('فتة عصب', 70000)">
         <div class="menu-name">فتة عصب</div>
-        <div class="menu-price">70,000 ليرة</div>
+        <div class="menu-price">70,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('بيض مع قوارما', 60000)">
+      <div class="menu-btn" onclick="addToCart('بيض مع قوارما', 60000)">
         <div class="menu-name">بيض مع قوارما</div>
-        <div class="menu-price">60,000 ليرة</div>
+        <div class="menu-price">60,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('حمص بلحمة', 60000)">
+      <div class="menu-btn" onclick="addToCart('حمص بلحمة', 60000)">
         <div class="menu-name">حمص بلحمة</div>
-        <div class="menu-price">60,000 ليرة</div>
+        <div class="menu-price">60,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('فتة لحمة', 65000)">
+      <div class="menu-btn" onclick="addToCart('فتة لحمة', 65000)">
         <div class="menu-name">فتة لحمة</div>
-        <div class="menu-price">65,000 ليرة</div>
+        <div class="menu-price">65,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('مرطبات', 15000)">
+      <div class="menu-btn" onclick="addToCart('مرطبات', 15000)">
         <div class="menu-name">مرطبات</div>
-        <div class="menu-price">15,000 ليرة</div>
+        <div class="menu-price">15,000 LBP</div>
       </div>
-      <div class="menu-btn" onclick="quickSale('مياه', 10000)">
+      <div class="menu-btn" onclick="addToCart('مياه', 10000)">
         <div class="menu-name">مياه</div>
-        <div class="menu-price">10,000 ليرة</div>
+        <div class="menu-price">10,000 LBP</div>
       </div>
     </div>
   </div>
 
-  <!-- تسجيل حركة يدوية -->
+  <!-- الفاتورة الحالية (السلة) -->
+  <div class="card" style="border: 2px solid #ea580c;">
+    <h3 style="color: #c2410c; justify-content: space-between;">
+      <span>🧾 الفاتورة الحالية</span>
+      <button onclick="clearCart()" style="background:#fee2e2; color:#dc2626; border:none; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">إلغاء الكل</button>
+    </h3>
+    
+    <div id="cart-items" class="cart-box">
+      لا توجد وجبات مضافة بالفاتورة حتى الآن.
+    </div>
+
+    <div class="cart-total" id="cart-total-box" style="display:none;">
+      <div>المجموع: <span id="cart-total-lbp" style="color:#ea580c; font-size:16px;">0 LBP</span></div>
+      <div style="font-size:12px; color:#64748b;">ما يعادل: <span id="cart-total-usd">$0.00</span></div>
+    </div>
+
+    <button class="btn-save" id="save-order-btn" onclick="saveOrder()" style="display:none;">✅ تسجيل الفاتورة في الحسابات</button>
+  </div>
+
+  <!-- تسجيل مصروف يدوي -->
   <div class="card">
-    <h3>📝 تسجيل مصروف أو حركة أخرى</h3>
+    <h3>💸 تسجيل مصروف (مشتريات/فواتير)</h3>
     <div class="row" style="display:flex; gap:6px;">
       <div style="flex:1;">
-        <label>نوع الحركة</label>
-        <select id="type">
-          <option value="income">مبيعات أخرى (+)</option>
-          <option value="expense" selected>مصاريف / مشتريات (-)</option>
-        </select>
-      </div>
-      <div style="flex:1;">
         <label>المبلغ</label>
-        <input type="number" id="amount" placeholder="0">
+        <input type="number" id="expense-amount" placeholder="0">
       </div>
-    </div>
-    <div class="row" style="display:flex; gap:6px; margin-top:4px;">
       <div style="flex:1;">
         <label>العملة</label>
-        <select id="currency">
+        <select id="expense-currency">
           <option value="LBP">ليرة (LBP)</option>
           <option value="USD">دولار ($)</option>
         </select>
       </div>
-      <div style="flex:1;">
-        <label>التاريخ</label>
-        <input type="date" id="entry_date">
-      </div>
     </div>
-    <label>ملاحظات / تفاصيل المصروف</label>
-    <input type="text" id="notes" placeholder="مثال: فاتورة لحمة، غاز...">
-    <button class="btn-save" id="save-btn" onclick="saveCustomEntry()">💾 حفظ الحركة اليدوية</button>
+    <label>تفاصيل المصروف</label>
+    <input type="text" id="expense-notes" placeholder="مثال: فاتورة لحمة، غاز، خضار...">
+    <button onclick="saveExpense()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; margin-top:8px; cursor:pointer;">💾 حفظ المصروف</button>
   </div>
 
   <!-- ملخص اليوم -->
@@ -225,7 +266,7 @@
 
   <!-- تفاصيل حركات اليوم -->
   <div class="card">
-    <h3>🔍 حركات اليوم التفصيلية</h3>
+    <h3>🔍 حركات وطلبات اليوم التفصيلية</h3>
     <div id="today-report" class="report-box">
       جاري التحميل...
     </div>
@@ -236,51 +277,143 @@
     const SUPABASE_KEY = 'sb_publishable_27rFxO5kcSht7s6befLZOg_meB3MQsy';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    document.getElementById('entry_date').valueAsDate = new Date();
+    let currentOrderType = 'داخل المطعم';
+    let cart = [];
 
-    // كبسة سريعة بلمسة واحدة
-    async function quickSale(itemName, priceLBP) {
+    // تغيير نوع الطلب
+    function setOrderType(type) {
+      currentOrderType = type;
+      document.getElementById('type-hall').className = 'type-btn' + (type === 'داخل المطعم' ? ' active' : '');
+      document.getElementById('type-takeaway').className = 'type-btn' + (type === 'تيك أواي' ? ' active' : '');
+      document.getElementById('type-delivery').className = 'type-btn' + (type === 'دليفري' ? ' active' : '');
+    }
+
+    // إضافة وجبة للسلة
+    function addToCart(name, priceLBP) {
+      const existing = cart.find(item => item.name === name);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ name, priceLBP, qty: 1 });
+      }
+      renderCart();
+    }
+
+    // تقليل أو حذف وجبة
+    function removeFromCart(name) {
+      const index = cart.findIndex(item => item.name === name);
+      if (index !== -1) {
+        if (cart[index].qty > 1) {
+          cart[index].qty -= 1;
+        } else {
+          cart.splice(index, 1);
+        }
+      }
+      renderCart();
+    }
+
+    // تفريغ السلة
+    function clearCart() {
+      cart = [];
+      renderCart();
+    }
+
+    // عرض الفاتورة الحالية
+    function renderCart() {
+      const container = document.getElementById('cart-items');
+      const totalBox = document.getElementById('cart-total-box');
+      const saveBtn = document.getElementById('save-order-btn');
+
+      if (cart.length === 0) {
+        container.innerHTML = 'لا توجد وجبات مضافة بالفاتورة حتى الآن.';
+        totalBox.style.display = 'none';
+        saveBtn.style.display = 'none';
+        return;
+      }
+
+      let html = '';
+      let totalLBP = 0;
+
+      cart.forEach(item => {
+        const itemTotal = item.priceLBP * item.qty;
+        totalLBP += itemTotal;
+        html += `
+          <div class="cart-item">
+            <div>
+              <strong>${item.name}</strong> (x${item.qty})
+            </div>
+            <div>
+              <span style="font-weight:bold; color:#ea580c; margin-left:8px;">${itemTotal.toLocaleString()} LBP</span>
+              <button onclick="removeFromCart('${item.name}')" style="background:#fee2e2; color:#dc2626; border:none; border-radius:4px; padding:2px 6px; font-weight:bold;">-</button>
+            </div>
+          </div>`;
+      });
+
+      container.innerHTML = html;
+      totalBox.style.display = 'block';
+      saveBtn.style.display = 'block';
+
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const totalUSD = totalLBP / rate;
+
+      document.getElementById('cart-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
+      document.getElementById('cart-total-usd').innerText = '$' + totalUSD.toFixed(2);
+    }
+
+    // حفظ الفاتورة الكاملة بطلب واحد
+    async function saveOrder() {
+      if (cart.length === 0) return;
+
+      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      let totalLBP = 0;
+      let detailsArr = [];
+
+      cart.forEach(item => {
+        totalLBP += (item.priceLBP * item.qty);
+        detailsArr.push(`${item.name} (x${item.qty})`);
+      });
+
+      const amountUSD = totalLBP / rate;
+      const detailsStr = `[${currentOrderType}] ${detailsArr.join('، ')} (${totalLBP.toLocaleString()} LBP)`;
+
+      const d = new Date();
+      const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      const btn = document.getElementById('save-order-btn');
+      btn.innerText = 'جاري الحفظ...';
+      btn.disabled = true;
+
       try {
-        const rateElem = document.getElementById('exchange-rate');
-        const rate = rateElem ? (parseFloat(rateElem.value) || 90000) : 90000;
-        const amountUSD = priceLBP / rate;
-        
-        // تاريخ اليوم المحلي
-        const d = new Date();
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const todayFormatted = `${year}-${month}-${day}`;
-
         const { error } = await supabaseClient
           .from('restaurant_expenses')
           .insert([{ 
             entry_date: todayFormatted, 
             type: 'income', 
-            category: itemName, 
+            category: `طلب ${currentOrderType}`, 
             amount: amountUSD, 
-            notes: `${priceLBP.toLocaleString()} LBP` 
+            notes: detailsStr 
           }]);
 
         if (error) {
           alert('خطأ بالحفظ: ' + error.message);
         } else {
-          // تحديث البيانات فوراً
+          alert('تم حفظ الفاتورة بنجاح! ✅');
+          clearCart();
           loadData();
         }
-      } catch(err) {
+      } catch (err) {
         alert('حدث خطأ: ' + err.message);
+      } finally {
+        btn.innerText = '✅ تسجيل الفاتورة في الحسابات';
+        btn.disabled = false;
       }
     }
 
-    // حفظ حركة يدوية
-    async function saveCustomEntry() {
-      const entry_date = document.getElementById('entry_date').value;
-      const type = document.getElementById('type').value;
-      const category = type === 'income' ? 'مبيعات أخرى' : 'مصاريف عامة';
-      const amountVal = parseFloat(document.getElementById('amount').value);
-      const currency = document.getElementById('currency').value;
-      const notes = document.getElementById('notes').value || '';
+    // حفظ مصروف يدوي
+    async function saveExpense() {
+      const amountVal = parseFloat(document.getElementById('expense-amount').value);
+      const currency = document.getElementById('expense-currency').value;
+      const notes = document.getElementById('expense-notes').value || 'مصروف عام';
       const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
 
       if (!amountVal || amountVal <= 0) {
@@ -289,23 +422,25 @@
       }
 
       let amountUSD = currency === 'USD' ? amountVal : (amountVal / rate);
+      const d = new Date();
+      const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
       const { error } = await supabaseClient
         .from('restaurant_expenses')
         .insert([{ 
-          entry_date, 
-          type, 
-          category, 
+          entry_date: todayFormatted, 
+          type: 'expense', 
+          category: 'مصاريف', 
           amount: amountUSD, 
-          notes: notes ? `${notes} (${amountVal} ${currency})` : `${amountVal} ${currency}` 
+          notes: `${notes} (${amountVal} ${currency})` 
         }]);
 
       if (error) {
         alert('خطأ: ' + error.message);
       } else {
-        alert('تم الحفظ بنجاح! ✅');
-        document.getElementById('amount').value = '';
-        document.getElementById('notes').value = '';
+        alert('تم حفظ المصروف بنجاح! ✅');
+        document.getElementById('expense-amount').value = '';
+        document.getElementById('expense-notes').value = '';
         loadData();
       }
     }
@@ -318,10 +453,7 @@
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
       
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const todayStr = `${year}-${month}-${day}`;
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
       const { data, error } = await supabaseClient
         .from('restaurant_expenses')
@@ -365,7 +497,7 @@
           }
         });
 
-        // تحديث الأرقام
+        // تحديث المبالغ
         document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
         document.getElementById('today-inc-lbp').innerText = Math.round(tInc * rate).toLocaleString() + ' LBP';
         document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
