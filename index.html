@@ -345,6 +345,7 @@
       <button class="exp-btn" onclick="setExpenseItem('دليفري')">دليفري</button>
       <button class="exp-btn" onclick="setExpenseItem('أجار الشباب')">أجار الشباب</button>
       <button class="exp-btn" onclick="setExpenseItem('حسين')">حسين</button>
+
       <button class="exp-btn" onclick="setExpenseItem('خالد')">خالد</button>
       <button class="exp-btn" onclick="setExpenseItem('قجة')">قجة</button>
       <button class="exp-btn" onclick="setExpenseItem('زيت')">زيت</button>
@@ -495,6 +496,17 @@
         <div class="type-btn" id="type-delivery" onclick="setOrderType('دليفري')">🛵 دليفري</div>
       </div>
 
+      <!-- اختيار اسم سائق الدليفري عند اختيار دليفري -->
+      <div id="driver-select-box" style="display:none; margin-top:8px;">
+        <label>سائق الدليفري المسؤول:</label>
+        <select id="driver-name">
+          <option value="حسين">حسين</option>
+          <option value="خالد">خالد</option>
+          <option value="علي">علي</option>
+          <option value="غير محدد">عام / غير محدد</option>
+        </select>
+      </div>
+
       <div id="cart-items" class="cart-box">
         لا توجد وجبات بالفاتورة.
       </div>
@@ -569,6 +581,13 @@
       document.getElementById('type-hall').className = 'type-btn' + (type === 'داخل المطعم' ? ' active' : '');
       document.getElementById('type-takeaway').className = 'type-btn' + (type === 'تيك أواي' ? ' active' : '');
       document.getElementById('type-delivery').className = 'type-btn' + (type === 'دليفري' ? ' active' : '');
+
+      const driverBox = document.getElementById('driver-select-box');
+      if (type === 'دليفري') {
+        driverBox.style.display = 'block';
+      } else {
+        driverBox.style.display = 'none';
+      }
     }
 
     function addToCart(name, priceLBP) {
@@ -688,6 +707,10 @@
       let totalLBP = 0;
       let msg = `🍽️ *فاتورة مطعم*\n`;
       msg += `📍 *نوع الطلب:* ${currentOrderType}\n`;
+      if (currentOrderType === 'دليفري') {
+        const driver = document.getElementById('driver-name').value;
+        msg += `🛵 *السائق:* ${driver}\n`;
+      }
       msg += `---------------------\n`;
 
       cart.forEach(item => {
@@ -775,7 +798,15 @@
       });
 
       const amountUSD = totalLBP / rate;
-      const detailsStr = `[${currentOrderType}] ${detailsArr.join('، ')} (${totalLBP.toLocaleString()} LBP)`;
+      let catName = `طلب ${currentOrderType}`;
+      let driverName = '';
+
+      if (currentOrderType === 'دليفري') {
+        driverName = document.getElementById('driver-name').value;
+        catName = `طلب دليفري (${driverName})`;
+      }
+
+      const detailsStr = `[${currentOrderType}] ${driverName ? 'السائق: ' + driverName + ' | ' : ''}${detailsArr.join('، ')} (${totalLBP.toLocaleString()} LBP)`;
 
       const d = new Date();
       const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -790,7 +821,7 @@
           .insert([{ 
             entry_date: todayFormatted, 
             type: 'income', 
-            category: `طلب ${currentOrderType}`, 
+            category: catName, 
             amount: amountUSD, 
             notes: detailsStr 
           }]);
