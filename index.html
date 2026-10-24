@@ -42,10 +42,7 @@
       -webkit-tap-highlight-color: transparent;
       transition: transform 0.1s ease, background-color 0.1s ease;
     }
-    .menu-btn:active {
-      background: #bbf7d0;
-      transform: scale(0.93);
-    }
+    .menu-btn:active { background: #bbf7d0; transform: scale(0.93); }
     .menu-name { font-weight: bold; font-size: 14px; color: #166534; }
     .menu-price { font-size: 11px; color: #15803d; margin-top: 2px; }
     
@@ -66,6 +63,33 @@
       box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
       border: 2px solid white;
     }
+
+    /* أزرار المشتريات السريعة */
+    .expense-quick-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      max-height: 140px;
+      overflow-y: auto;
+      padding: 4px;
+      background: #f1f5f9;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+    }
+    .exp-btn {
+      background: #ffffff;
+      border: 1px solid #94a3b8;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+    }
+    .exp-btn:active { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
 
     .floating-cart-bar {
       position: fixed;
@@ -99,10 +123,7 @@
       transition: opacity 0.2s ease;
       padding: 15px;
     }
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
     .modal-card {
       background: white;
       width: 100%;
@@ -127,11 +148,7 @@
       cursor: pointer;
       color: #475569;
     }
-    .type-btn.active {
-      border-color: #3b82f6;
-      background: #eff6ff;
-      color: #1d4ed8;
-    }
+    .type-btn.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
 
     .report-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; margin-top: 8px; margin-bottom: 8px; }
     .tab-btn {
@@ -145,11 +162,7 @@
       cursor: pointer;
       color: #475569;
     }
-    .tab-btn.active {
-      border-color: #10b981;
-      background: #ecfdf5;
-      color: #047857;
-    }
+    .tab-btn.active { border-color: #10b981; background: #ecfdf5; color: #047857; }
 
     .cart-box { background: #fff8f1; border: 1.5px dashed #f97316; padding: 10px; border-radius: 12px; margin-top: 8px; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fed7aa; padding: 6px 0; font-size: 13px; }
@@ -221,7 +234,7 @@
 
   <div class="rate-box">
     <span>سعر الصرف ($1 = LBP):</span>
-    <input type="number" id="exchange-rate" value="90000" onchange="loadData()">
+    <input type="text" id="exchange-rate" value="90000" onchange="loadData()">
   </div>
 
   <div class="card">
@@ -295,12 +308,72 @@
     </div>
   </div>
 
+  <!-- تسجيل مصروف / مشتريات مع كبسات سريعة -->
   <div class="card">
     <h3>💸 تسجيل مصروف (مشتريات/فواتير)</h3>
-    <div class="row" style="display:flex; gap:6px;">
+    
+    <label>كبسات سريعة للمشتريات والمصاريف (كبسة زر):</label>
+    <div class="expense-quick-grid">
+      <button class="exp-btn" onclick="setExpenseItem('سمنة')">سمنة</button>
+      <button class="exp-btn" onclick="setExpenseItem('لبن')">لبن</button>
+      <button class="exp-btn" onclick="setExpenseItem('طحينة')">طحينة</button>
+      <button class="exp-btn" onclick="setExpenseItem('كاجو')">كاجو</button>
+      <button class="exp-btn" onclick="setExpenseItem('خضرا')">خضرا</button>
+      <button class="exp-btn" onclick="setExpenseItem('فول')">فول</button>
+      <button class="exp-btn" onclick="setExpenseItem('حمص')">حمص</button>
+      <button class="exp-btn" onclick="setExpenseItem('علب فول')">علب فول</button>
+      <button class="exp-btn" onclick="setExpenseItem('علب فتة')">علب فتة</button>
+      <button class="exp-btn" onclick="setExpenseItem('علب حمص')">علب حمص</button>
+      <button class="exp-btn" onclick="setExpenseItem('كياس ٤٥')">كياس ٤٥</button>
+      <button class="exp-btn" onclick="setExpenseItem('كياس بزر')">كياس بزر</button>
+      <button class="exp-btn" onclick="setExpenseItem('فلين ١')">فلين ١</button>
+      <button class="exp-btn" onclick="setExpenseItem('فلين ٢')">فلين ٢</button>
+      <button class="exp-btn" onclick="setExpenseItem('فلين ٣')">فلين ٣</button>
+      <button class="exp-btn" onclick="setExpenseItem('غاز')">غاز</button>
+      <button class="exp-btn" onclick="setExpenseItem('بيبسي')">بيبسي</button>
+      <button class="exp-btn" onclick="setExpenseItem('مياه')">مياه</button>
+      <button class="exp-btn" onclick="setExpenseItem('نقلة مياه')">نقلة مياه</button>
+
+      <button class="exp-btn" onclick="setExpenseItem('دليفري')">دليفري</button>
+      <button class="exp-btn" onclick="setExpenseItem('أجار الشباب')">أجار الشباب</button>
+      <button class="exp-btn" onclick="setExpenseItem('حسين')">حسين</button>
+      <button class="exp-btn" onclick="setExpenseItem('خالد')">خالد</button>
+      <button class="exp-btn" onclick="setExpenseItem('قجة')">قجة</button>
+      <button class="exp-btn" onclick="setExpenseItem('زيت')">زيت</button>
+      <button class="exp-btn" onclick="setExpenseItem('المصري')">المصري</button>
+      <button class="exp-btn" onclick="setExpenseItem('الديراني')">الديراني</button>
+      <button class="exp-btn" onclick="setExpenseItem('مهدي زعيم')">مهدي زعيم</button>
+      <button class="exp-btn" onclick="setExpenseItem('انترنت')">انترنت</button>
+      <button class="exp-btn" onclick="setExpenseItem('كربونات')">كربونات</button>
+
+      <button class="exp-btn" onclick="setExpenseItem('حامض الليمون')">حامض الليمون</button>
+      <button class="exp-btn" onclick="setExpenseItem('ملح')">ملح</button>
+
+      <button class="exp-btn" onclick="setExpenseItem('شاي')">شاي</button>
+      <button class="exp-btn" onclick="setExpenseItem('سكر')">سكر</button>
+
+      <button class="exp-btn" onclick="setExpenseItem('حناك')">حناك</button>
+      <button class="exp-btn" onclick="setExpenseItem('لسان')">لسان</button>
+
+      <button class="exp-btn" onclick="setExpenseItem('الجاروش')">الجاروش</button>
+      <button class="exp-btn" onclick="setExpenseItem('عصب')">عصب</button>
+
+      <button class="exp-btn" onclick="setExpenseItem('مقادم')">مقادم</button>
+      <button class="exp-btn" onclick="setExpenseItem('لحمة')">لحمة</button>
+
+      <button class="exp-btn" onclick="setExpenseItem('مازوت')">مازوت</button>
+      <button class="exp-btn" onclick="setExpenseItem('كياس نفايات')">كياس نفايات</button>
+
+      <button class="exp-btn" onclick="setExpenseItem('أوردر دليفري')">أوردر دليفري</button>
+    </div>
+
+    <label>تفاصيل المصروف Selected</label>
+    <input type="text" id="expense-notes" placeholder="اختر من فوق أو اكتب بنفسك...">
+
+    <div class="row" style="display:flex; gap:6px; margin-top:6px;">
       <div style="flex:1;">
         <label>المبلغ</label>
-        <input type="number" id="expense-amount" placeholder="0">
+        <input type="text" id="expense-amount" placeholder="0" oninput="fixNumbers(this)">
       </div>
       <div style="flex:1;">
         <label>العملة</label>
@@ -310,8 +383,7 @@
         </select>
       </div>
     </div>
-    <label>تفاصيل المصروف</label>
-    <input type="text" id="expense-notes" placeholder="مثال: فاتورة لحمة، غاز...">
+
     <button onclick="saveExpense()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; margin-top:8px; cursor:pointer;">💾 حفظ المصروف</button>
   </div>
 
@@ -319,20 +391,20 @@
     <h3>☀️ ملخص اليوم</h3>
     <div class="grid">
       <div class="stat">
-        <div class="stat-title">مبيعات اليوم</div>
+        <div class="stat-title">مجموع المبيعات</div>
         <div id="today-inc-usd" class="stat-usd income">$0</div>
         <div id="today-inc-lbp" class="stat-lbp">0 LBP</div>
       </div>
       <div class="stat">
-        <div class="stat-title">مصاريف اليوم</div>
+        <div class="stat-title">مجموع الدفع (المصاريف)</div>
         <div id="today-exp-usd" class="stat-usd expense">$0</div>
         <div id="today-exp-lbp" class="stat-lbp">0 LBP</div>
       </div>
     </div>
-    <div class="stat" style="margin-top: 6px; background: #ecfdf5;">
-      <div class="stat-title">صافي اليوم</div>
-      <div id="today-net-usd" class="stat-usd">$0</div>
-      <div id="today-net-lbp" class="stat-lbp">0 LBP</div>
+    <div class="stat" style="margin-top: 6px; background: #ecfdf5; border-color: #a7f3d0;">
+      <div class="stat-title" style="color:#047857; font-weight:bold;">💵 الباقي (الصافي)</div>
+      <div id="today-net-usd" class="stat-usd" style="font-size:18px;">$0</div>
+      <div id="today-net-lbp" class="stat-lbp" style="font-size:12px; font-weight:800;">0 LBP</div>
     </div>
     
     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:8px; font-size:10px; text-align:center;">
@@ -386,7 +458,7 @@
       جاري التحميل...
     </div>
 
-    <button class="btn-wa" onclick="shareReportWhatsApp()">📲 إرسال هذا التقرير عبر واتساب</button>
+    <button class="btn-wa" onclick="shareReportWhatsApp()">📲 إرسال التقرير اليومي عبر واتساب</button>
     <button class="btn-reset" onclick="resetTodayEntries()">🗑️ تصفير وحذف جميع حركات اليوم</button>
   </div>
 
@@ -436,6 +508,31 @@
     let currentReportFilter = 'all';
     let globalTodayData = [];
     let cart = [];
+
+    // تحويل الأرقام العربية إلى إنكليزية
+    function fixNumbers(inputElem) {
+      let str = inputElem.value;
+      const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+      for (let i = 0; i < 10; i++) {
+        str = str.replace(new RegExp(arabicDigits[i], 'g'), i);
+      }
+      inputElem.value = str;
+    }
+
+    function parseArabicNumber(val) {
+      if (!val) return 0;
+      let str = String(val);
+      const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+      for (let i = 0; i < 10; i++) {
+        str = str.replace(new RegExp(arabicDigits[i], 'g'), i);
+      }
+      return parseFloat(str) || 0;
+    }
+
+    function setExpenseItem(itemName) {
+      document.getElementById('expense-notes').value = itemName;
+      document.getElementById('expense-amount').focus();
+    }
 
     function setOrderType(type) {
       currentOrderType = type;
@@ -514,7 +611,7 @@
         container.innerHTML = html;
       }
 
-      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       const totalUSD = totalLBP / rate;
 
       document.getElementById('modal-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
@@ -534,7 +631,7 @@
         alert('الفاتورة فارغة!');
         return;
       }
-      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       let totalLBP = 0;
       let msg = `🍽️ *فاتورة مطعم*\n`;
       msg += `📍 *نوع الطلب:* ${currentOrderType}\n`;
@@ -554,55 +651,37 @@
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
     }
 
+    // إرسال تقرير اليوم المنسق مع مجموع المبيعات والدفع والباقي
     function shareReportWhatsApp() {
-      if (globalTodayData.length === 0) {
-        alert('لا توجد حركات مسجلة اليوم إطلاقاً!');
-        return;
-      }
-
-      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-      let title = "📋 *تقرير اليوم الشامل*";
-      if (currentReportFilter === 'sales') title = "🛍️ *تقرير المبيعات والطلبات*";
-      if (currentReportFilter === 'expenses') title = "💸 *تقرير المصاريف والدفعات*";
-      if (currentReportFilter === 'sections') title = "📍 *تقرير مبيعات الأقسام*";
+      let tInc = 0;
+      let tExp = 0;
 
-      let msg = `${title}\n📅 *التاريخ:* ${todayStr}\n---------------------\n`;
-      let filterTotalUSD = 0;
-
-      const filtered = globalTodayData.filter(item => {
-        if (currentReportFilter === 'all') return true;
-        if (currentReportFilter === 'sales') return item.type === 'income';
-        if (currentReportFilter === 'expenses') return item.type === 'expense';
-        if (currentReportFilter === 'sections') return item.type === 'income' && (item.category.includes('صالة') || item.category.includes('تيك أواي') || item.category.includes('دليفري'));
-        return true;
-      });
-
-      if (filtered.length === 0) {
-        alert('لا توجد حركات ضمن هذا التقرير!');
-        return;
-      }
-
-      filtered.forEach(item => {
+      globalTodayData.forEach(item => {
         const amtUSD = Number(item.amount);
-        filterTotalUSD += (item.type === 'income' ? amtUSD : -amtUSD);
-        const sign = item.type === 'income' ? '+' : '-';
-        const lbpValue = Math.round(amtUSD * rate).toLocaleString();
-        msg += `• ${item.category}: ${sign}${lbpValue} LBP ($${amtUSD.toFixed(2)})\n  _${item.notes || ''}_\n`;
+        if (item.type === 'income') tInc += amtUSD;
+        if (item.type === 'expense') tExp += amtUSD;
       });
 
+      const tNet = tInc - tExp;
+
+      let msg = `📊 *التقرير اليومي للصندوق*\n`;
+      msg += `📅 *التاريخ:* ${todayStr}\n`;
       msg += `---------------------\n`;
-      const netLBP = Math.round(filterTotalUSD * rate).toLocaleString();
-      msg += `📊 *إجمالي التقرير:* ${netLBP} LBP ($${filterTotalUSD.toFixed(2)})\n`;
+      msg += `🛍️ *مجموع المبيعات:* ${Math.round(tInc * rate).toLocaleString()} LBP ($${tInc.toFixed(2)})\n`;
+      msg += `💸 *مجموع الدفع (المصاريف):* ${Math.round(tExp * rate).toLocaleString()} LBP ($${tExp.toFixed(2)})\n`;
+      msg += `---------------------\n`;
+      msg += `💵 *الباقي (الصافي):* ${Math.round(tNet * rate).toLocaleString()} LBP ($${tNet.toFixed(2)})\n`;
 
       const encodedMsg = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
     }
 
     async function resetTodayEntries() {
-      if (confirm('هل أنت تأكد من حذف وتصفير جميع حركات اليوم؟ هذه الخطوة لا يمكن التراجع عنها!')) {
+      if (confirm('هل أنت تأكد من حذف وتصفير جميع حركات اليوم؟')) {
         const idsToDelete = globalTodayData.map(item => item.id);
         if (idsToDelete.length === 0) {
           alert('لا توجد حركات اليوم لتصفيرها!');
@@ -629,7 +708,7 @@
         return;
       }
 
-      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       let totalLBP = 0;
       let detailsArr = [];
 
@@ -691,10 +770,10 @@
     }
 
     async function saveExpense() {
-      const amountVal = parseFloat(document.getElementById('expense-amount').value);
+      const amountVal = parseArabicNumber(document.getElementById('expense-amount').value);
       const currency = document.getElementById('expense-currency').value;
       const notes = document.getElementById('expense-notes').value || 'مصروف عام';
-      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
 
       if (!amountVal || amountVal <= 0) {
         alert('الرجاء إدخال مبلغ صحيح!');
@@ -733,7 +812,7 @@
     }
 
     function renderFilteredReport() {
-      const rate = parseFloat(document.getElementById('exchange-rate').value) || 90000;
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       let todayHtml = '';
 
       const filtered = globalTodayData.filter(item => {
@@ -776,7 +855,7 @@
 
     async function loadData() {
       const rateElem = document.getElementById('exchange-rate');
-      const rate = rateElem ? (parseFloat(rateElem.value) || 90000) : 90000;
+      const rate = parseArabicNumber(rateElem.value) || 90000;
       
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
