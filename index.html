@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>حسابات المطعم</title>
+  <!-- تحميل مكتبة Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root { --primary: #10b981; --danger: #ef4444; --bg: #f3f4f6; --primary-dark: #059669; }
@@ -12,7 +13,7 @@
     h2, h3 { margin: 0 0 10px 0; color: #1f2937; text-align: center; font-size: 18px; }
     label { font-size: 13px; color: #4b5563; font-weight: bold; margin-top: 6px; display: block; }
     input, select { width: 100%; padding: 10px; margin-top: 3px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 15px; background: #fff; }
-    .btn-save { width: 100%; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3); }
+    .btn-save { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3); }
     .btn-save:active { background: var(--primary-dark); transform: scale(0.98); }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
     .stat { text-align: center; padding: 10px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; }
@@ -20,7 +21,7 @@
     .income { color: var(--primary); }
     .expense { color: var(--danger); }
     .report-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 14px; }
-    .report-title { font-weight: bold; color: #1e40af; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .report-title { font-weight: bold; color: #1e40af; margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dashed #dbeafe; padding-bottom: 4px; }
   </style>
 </head>
 <body>
@@ -46,13 +47,13 @@
       <option value="أخرى">أخرى</option>
     </select>
 
-    <label>المبلغ ($ أو العملة)</label>
+    <label>المبلغ</label>
     <input type="number" id="amount" placeholder="0">
 
     <label>ملاحظات</label>
     <input type="text" id="notes" placeholder="مثال: فاتورة لحمة...">
 
-    <button class="btn-save" onclick="saveEntry()">💾 حفظ الحركة فوراً</button>
+    <button class="btn-save" id="save-btn" onclick="saveEntry()">💾 حفظ الحركة فوراً</button>
   </div>
 
   <div class="card">
@@ -83,7 +84,13 @@
   <script>
     const SUPABASE_URL = 'https://yjymshmonfhdfjegszbp.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_27rFxO5kcSht7s6befLZOg_meB3MQsy';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    let supabaseClient = null;
+    try {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (err) {
+      alert('خطأ في الاتصال بقاعدة البيانات: ' + err.message);
+    }
 
     document.getElementById('entry_date').valueAsDate = new Date();
 
@@ -91,40 +98,49 @@
       const entry_date = document.getElementById('entry_date').value;
       const type = document.getElementById('type').value;
       const category = document.getElementById('category').value;
-      const amount = parseFloat(document.getElementById('amount').value);
+      const amountVal = document.getElementById('amount').value;
       const notes = document.getElementById('notes').value || '';
 
-      if (!amount || isNaN(amount)) {
-        alert('الرجاء إدخال المبلغ بشكل صحيح!');
+      if (!amountVal || amountVal <= 0) {
+        alert('الرجاء إدخال مبلغ صحيح أكبر من الصفر!');
         return;
       }
 
-      const btn = document.querySelector('.btn-save');
+      const amount = parseFloat(amountVal);
+      const btn = document.getElementById('save-btn');
       btn.innerText = 'جاري الحفظ...';
+      btn.disabled = true;
 
-      const { error } = await supabase
-        .from('restaurant_expenses')
-        .insert([{ entry_date, type, category, amount, notes }]);
+      try {
+        const { data, error } = await supabaseClient
+          .from('restaurant_expenses')
+          .insert([{ entry_date, type, category, amount, notes }]);
 
-      btn.innerText = '💾 حفظ الحركة فوراً';
-
-      if (error) {
-        alert('خطأ بالحفظ: ' + error.message);
-      } else {
-        alert('تم الحفظ بنجاح! ✅');
-        document.getElementById('amount').value = '';
-        document.getElementById('notes').value = '';
-        loadData();
+        if (error) {
+          alert('خطأ من السيرفر: ' + error.message);
+        } else {
+          alert('تم الحفظ بنجاح! ✅');
+          document.getElementById('amount').value = '';
+          document.getElementById('notes').value = '';
+          loadData();
+        }
+      } catch (err) {
+        alert('حدث خطأ غير متوقع: ' + err.message);
+      } finally {
+        btn.innerText = '💾 حفظ الحركة فوراً';
+        btn.disabled = false;
       }
     }
 
     async function loadData() {
+      if (!supabaseClient) return;
+
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
       const todayStr = now.toISOString().split('T')[0];
 
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('restaurant_expenses')
         .select('*')
         .gte('entry_date', firstDay)
@@ -132,7 +148,7 @@
         .order('id', { ascending: false });
 
       if (error) {
-        console.error(error);
+        console.error('Error loading data:', error);
         return;
       }
 
@@ -146,7 +162,6 @@
           if (item.type === 'income') income += amt;
           if (item.type === 'expense') expense += amt;
 
-          // حركات اليوم فقط لتقرير اليوم
           if (item.entry_date === todayStr) {
             todayCount++;
             const colorClass = item.type === 'income' ? 'income' : 'expense';
