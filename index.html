@@ -384,17 +384,6 @@
       border-bottom: none;
     }
 
-    .summary-card-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-weight: 800;
-      font-size: 13px;
-    }
-
     .rate-box {
       background: #fffbe3;
       border: 1px solid #fde047;
@@ -638,6 +627,9 @@
         <div id="type-delivery-total" style="font-weight:800; color:#0f172a; margin-top:2px;">0 LBP</div>
       </div>
     </div>
+
+    <!-- Detailed Items & Orders Breakdown -->
+    <button onclick="openDetailedReportModal()" style="width:100%; padding:10px; background:#1e293b; color:white; border:none; border-radius:8px; font-weight:800; font-size:12px; margin-top:12px; cursor:pointer;">📊 Show Items & Orders Breakdown (تفاصيل الصحون والطلبات)</button>
   </div>
 
   <!-- Archive & History -->
@@ -757,6 +749,22 @@
       </div>
 
       <button id="detail-delete-btn" style="width:100%; padding:12px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:10px; font-weight:800; font-size:13px; margin-top:14px; cursor:pointer;">🗑️ Delete Transaction</button>
+    </div>
+  </div>
+
+  <!-- Detailed Report Modal (تقرير تفصيلي للصحون وأنواع الطلبات) -->
+  <div class="modal-overlay" id="detailed-report-modal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:16px; color:#1e293b;">📊 تفصيل المبيعات والصحون (اليوم)</h3>
+        <button onclick="closeDetailedReportModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
+      </div>
+
+      <div id="detailed-report-content" style="font-size:13px; color:#334155; line-height:1.6; max-height:60vh; overflow-y:auto;">
+        Loading breakdown...
+      </div>
+
+      <button onclick="closeDetailedReportModal()" style="width:100%; padding:12px; background:var(--navy); color:white; border:none; border-radius:8px; font-weight:800; margin-top:14px; cursor:pointer;">إغلاق</button>
     </div>
   </div>
 
@@ -888,6 +896,64 @@
     function openModal() { document.getElementById('cart-modal').classList.add('active'); }
     function closeModal() { document.getElementById('cart-modal').classList.remove('active'); }
 
+    function openDetailedReportModal() {
+      let orderTypesCount = { 'داخل المطعم': 0, 'تيك أواي': 0, 'دليفري': 0 };
+      let orderTypesAmount = { 'داخل المطعم': 0, 'تيك أواي': 0, 'دليفري': 0 };
+      let itemsCount = {};
+
+      globalTodayData.forEach(item => {
+        // إذا كان أوردر مبيعات
+        if (item.category.includes('أوردر') || item.category.includes('داخل المطعم') || item.category.includes('تيك أواي') || item.category.includes('دليفري')) {
+          let type = 'داخل المطعم';
+          if (item.category.includes('تيك أواي')) type = 'تيك أواي';
+          else if (item.category.includes('دليفري')) type = 'دليفري';
+
+          orderTypesCount[type] = (orderTypesCount[type] || 0) + 1;
+          orderTypesAmount[type] = (orderTypesAmount[type] || 0) + Number(item.amount);
+
+          // استخراج تفاصيل الصحون من الـ notes
+          if (item.notes) {
+            let lines = item.notes.split('\n');
+            lines.forEach(line => {
+              // الصيغة عادة: • اسم الصنف (xالكمية) - السعر
+              if (line.includes('x')) {
+                let parts = line.split('x');
+                let itemName = parts[0].replace('•', '').trim();
+                let qtyPart = parts[1].split(' ')[0];
+                let qty = parseInt(qtyPart) || 1;
+                itemsCount[itemName] = (itemsCount[itemName] || 0) + qty;
+              }
+            });
+          }
+        }
+      });
+
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+
+      let html = `<div style="font-weight:bold; color:#047857; margin-bottom:8px;">📍 حسب نوع الطلبات (Order Types):</div>`;
+      html += `• 🏠 داخل المطعم: ${orderTypesCount['داخل المطعم']} أوردر ($${orderTypesAmount['داخل المطعم'].toFixed(2)})<br>`;
+      html += `• 🛍️ تيك أواي: ${orderTypesCount['تيك أواي']} أوردر ($${orderTypesAmount['تيك أواي'].toFixed(2)})<br>`;
+      html += `• 🛵 دليفري: ${orderTypesCount['دليفري']} أوردر ($${orderTypesAmount['دليفري'].toFixed(2)})<br>`;
+
+      html += `<hr style="border:0; border-top:1px solid #cbd5e1; margin:12px 0;">`;
+      html += `<div style="font-weight:bold; color:#1e293b; margin-bottom:8px;">🍲 عدد الصحون والأصناف المباعة (Items Count):</div>`;
+
+      if (Object.keys(itemsCount).length === 0) {
+        html += `<span style="color:#64748b;">لا توجد أصناف مسجلة اليوم.</span>`;
+      } else {
+        for (let [itemName, qty] of Object.entries(itemsCount)) {
+          html += `• <b>${itemName}</b>: ${qty} صحن/حبة<br>`;
+        }
+      }
+
+      document.getElementById('detailed-report-content').innerHTML = html;
+      document.getElementById('detailed-report-modal').classList.add('active');
+    }
+
+    function closeDetailedReportModal() {
+      document.getElementById('detailed-report-modal').classList.remove('active');
+    }
+
     function openDetailModal(id) {
       const item = globalTodayData.find(x => x.id === id);
       if (!item) return;
@@ -934,233 +1000,95 @@
 
     async function settleDriverAccount() {
       const driver = document.getElementById('settle-driver-select').value;
-      const pendingItems = globalTodayData.filter(item => item.category.includes(`معلق: ${driver}`));
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      
+      let pendingUSD = 0;
+      let pendingIds = [];
+      globalTodayData.forEach(item => {
+        if (item.category.includes(`معلق: ${driver}`)) {
+          pendingUSD += Number(item.amount);
+          pendingIds.push(item.id);
+        }
+      });
 
-      if (pendingItems.length === 0) {
-        alert(`No pending orders for driver (${driver})!`);
+      if (pendingUSD <= 0) {
+        alert('No pending amount for this driver!');
         return;
       }
 
-      if (confirm(`Are you sure you want to settle driver (${driver}) account and move funds to Register?`)) {
-        const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
-        let totalUSD = 0;
-        const idsToDelete = [];
+      const d = new Date();
+      const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-        pendingItems.forEach(item => {
-          totalUSD += Number(item.amount);
-          idsToDelete.push(item.id);
-        });
-
-        await supabaseClient.from('restaurant_expenses').delete().in('id', idsToDelete);
-
-        const d = new Date();
-        const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-        const { error } = await supabaseClient.from('restaurant_expenses').insert([{
+      // حذف المعلق وإضافته كقبض كاش للصندوق
+      const { error: insertError } = await supabaseClient
+        .from('restaurant_entries')
+        .insert([{
           entry_date: todayFormatted,
-          type: 'income',
-          category: `طلب دليفري (${driver})`,
-          amount: totalUSD,
-          notes: `Settled driver ${driver} full amount of ${Math.round(totalUSD * rate).toLocaleString()} LBP`
+          category: `قبض دليفري (${driver})`,
+          amount: pendingUSD,
+          notes: `تم تسوية حساب الدليفري ${driver} بمبلغ $${pendingUSD.toFixed(2)}`
         }]);
 
-        if (error) {
-          alert('Error settling account: ' + error.message);
-        } else {
-          alert(`Successfully settled driver (${driver}) account! ✅`);
-          loadData();
-        }
-      }
-    }
-
-    function shareWhatsApp() {
-      if (cart.length === 0) {
-        alert('Cart is empty!');
-        return;
-      }
-      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
-      let totalLBP = 0;
-      let msg = `🍽️ *Restaurant Receipt*\n`;
-      msg += `📍 *Order Type:* ${currentOrderType}\n`;
-      if (currentOrderType === 'دليفري') {
-        const driver = document.getElementById('driver-name').value;
-        msg += `🛵 *Driver:* ${driver}\n`;
-      }
-      msg += `---------------------\n`;
-
-      cart.forEach(item => {
-        const itemTotal = item.priceLBP * item.qty;
-        totalLBP += itemTotal;
-        msg += `• ${item.name} (x${item.qty}) = ${itemTotal.toLocaleString()} LBP\n`;
-      });
-
-      const totalUSD = (totalLBP / rate).toFixed(2);
-      msg += `---------------------\n`;
-      msg += `💰 *Total:* ${totalLBP.toLocaleString()} LBP ($${totalUSD})\n`;
-
-      const encodedMsg = encodeURIComponent(msg);
-      window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
-    }
-
-    function shareReportWhatsApp() {
-      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
-      const selectedDate = document.getElementById('archive-date').value || new Date().toISOString().split('T')[0];
-
-      let tInc = 0;
-      let tExp = 0;
-
-      globalTodayData.forEach(item => {
-        if (!item.category.includes('معلق:')) {
-          const amtUSD = Number(item.amount);
-          if (item.type === 'income') tInc += amtUSD;
-          if (item.type === 'expense') tExp += amtUSD;
-        }
-      });
-
-      const tNet = tInc - tExp;
-
-      if (currentReportFilter === 'all') {
-        let msg = `📊 *Overall Daily Summary*\n`;
-        msg += `📅 *Date:* ${selectedDate}\n`;
-        msg += `---------------------\n`;
-        msg += `🛍️ *Total Sales:* ${Math.round(tInc * rate).toLocaleString()} LBP ($${tInc.toFixed(2)})\n`;
-        msg += `💸 *Total Paid (Expenses):* ${Math.round(tExp * rate).toLocaleString()} LBP ($${tExp.toFixed(2)})\n`;
-        msg += `---------------------\n`;
-        msg += `💵 *Net Remaining:* ${Math.round(tNet * rate).toLocaleString()} LBP ($${tNet.toFixed(2)})\n`;
-
-        const encodedMsg = encodeURIComponent(msg);
-        window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+      if (insertError) {
+        alert('Error settling: ' + insertError.message);
         return;
       }
 
-      const filtered = getFilteredReportData();
+      const { error: deleteError } = await supabaseClient
+        .from('restaurant_entries')
+        .delete()
+        .in('id', pendingIds);
 
-      if (filtered.length === 0) {
-        alert('No data to share for this tab!');
-        return;
-      }
-
-      let tabTitle = "Sales Only";
-      if (currentReportFilter === 'expenses') tabTitle = "Expenses Only";
-      if (currentReportFilter === 'sections') tabTitle = "Sections Breakdown";
-
-      let totalUSD = 0;
-      let msg = `📊 *${tabTitle} Report*\n`;
-      msg += `📅 *Date:* ${selectedDate}\n`;
-      msg += `---------------------\n`;
-
-      filtered.forEach(item => {
-        const amtUSD = Number(item.amount);
-        const sign = item.type === 'income' ? '+' : '-';
-        const lbpVal = Math.round(amtUSD * rate).toLocaleString();
-        totalUSD += (item.type === 'income' ? amtUSD : -amtUSD);
-        msg += `${sign} ${item.category}: ${lbpVal} LBP ($${amtUSD.toFixed(2)})\n`;
-      });
-
-      msg += `---------------------\n`;
-      msg += `💰 *Total Amount:* ${Math.round(totalUSD * rate).toLocaleString()} LBP ($${totalUSD.toFixed(2)})\n`;
-
-      const encodedMsg = encodeURIComponent(msg);
-      window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
-    }
-
-    async function loadArchiveData() {
-      const selectedDate = document.getElementById('archive-date').value;
-      if (!selectedDate) return;
-      loadData(selectedDate);
-    }
-
-    async function resetTodayEntries() {
-      if (confirm('Are you sure you want to reset and delete all records for this day?')) {
-        const idsToDelete = globalTodayData.map(item => item.id);
-        if (idsToDelete.length === 0) {
-          alert('No records to reset!');
-          return;
-        }
-
-        const { error } = await supabaseClient
-          .from('restaurant_expenses')
-          .delete()
-          .in('id', idsToDelete);
-
-        if (error) {
-          alert('Error resetting: ' + error.message);
-        } else {
-          alert('Successfully reset daily records! ✅');
-          loadData();
-        }
+      if (deleteError) {
+        alert('Error clearing pending: ' + deleteError.message);
+      } else {
+        alert(`Successfully settled account for ${driver}! ✅`);
+        loadData();
       }
     }
 
     async function saveOrder() {
       if (cart.length === 0) {
-        alert('Please select menu items first!');
+        alert('Cart is empty!');
         return;
       }
 
-      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       let totalLBP = 0;
-      let detailsArr = [];
+      cart.forEach(item => totalLBP += (item.priceLBP * item.qty));
 
-      cart.forEach(item => {
-        totalLBP += (item.priceLBP * item.qty);
-        detailsArr.push(`${item.name} (x${item.qty})`);
-      });
-
-      const amountUSD = totalLBP / rate;
-      let catName = `طلب ${currentOrderType}`;
-      let driverName = '';
-
-      if (currentOrderType === 'دليفري') {
-        driverName = document.getElementById('driver-name').value;
-        catName = `طلب دليفري (معلق: ${driverName})`;
-      }
-
-      const detailsStr = `[${currentOrderType}] ${driverName ? 'Driver: ' + driverName + ' | ' : ''}${detailsArr.join(', ')} (${totalLBP.toLocaleString()} LBP)`;
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      const totalUSD = totalLBP / rate;
 
       const d = new Date();
       const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-      const btn = document.getElementById('save-order-btn');
-      btn.innerText = 'Saving...';
-      btn.disabled = true;
+      let notesStr = '';
+      cart.forEach(item => {
+        notesStr += `• ${item.name} (x${item.qty}) - ${(item.priceLBP * item.qty).toLocaleString()} LBP\n`;
+      });
 
-      try {
-        const { error } = await supabaseClient
-          .from('restaurant_expenses')
-          .insert([{ 
-            entry_date: todayFormatted, 
-            type: 'income', 
-            category: catName, 
-            amount: amountUSD, 
-            notes: detailsStr 
-          }]);
-
-        if (error) {
-          alert('Save error: ' + error.message);
-        } else {
-          alert(currentOrderType === 'دليفري' ? `Delivery order saved under driver (${driverName}) pending list ✅` : 'Order saved successfully! ✅');
-          clearCart();
-          closeModal();
-          loadData();
-        }
-      } catch (err) {
-        alert('Error: ' + err.message);
-      } finally {
-        btn.innerText = '✅ Save Order to Register';
-        btn.disabled = false;
+      let categoryName = `أوردر (${currentOrderType})`;
+      if (currentOrderType === 'دليفري') {
+        const driver = document.getElementById('driver-name').value;
+        categoryName = `أوردر دليفري (معلق: ${driver})`;
+        notesStr += `Driver: ${driver}`;
       }
-    }
 
-    async function deleteEntry(id) {
       const { error } = await supabaseClient
-        .from('restaurant_expenses')
-        .delete()
-        .eq('id', id);
+        .from('restaurant_entries')
+        .insert([{
+          entry_date: todayFormatted,
+          category: categoryName,
+          amount: totalUSD,
+          notes: notesStr.trim()
+        }]);
 
       if (error) {
-        alert('Delete error: ' + error.message);
+        alert('Error saving order: ' + error.message);
       } else {
+        alert('Order saved successfully! ✅');
+        clearCart();
+        closeModal();
         loadData();
       }
     }
@@ -1168,7 +1096,7 @@
     async function saveExpense() {
       const amountVal = parseArabicNumber(document.getElementById('expense-amount').value);
       const currency = document.getElementById('expense-currency').value;
-      const notes = document.getElementById('expense-notes').value || 'General Expense';
+      const notes = document.getElementById('expense-notes').value || 'Expense';
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
 
       if (!amountVal || amountVal <= 0) {
@@ -1181,13 +1109,12 @@
       const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
       const { error } = await supabaseClient
-        .from('restaurant_expenses')
-        .insert([{ 
-          entry_date: todayFormatted, 
-          type: 'expense', 
-          category: 'مصاريف', 
-          amount: amountUSD, 
-          notes: `${notes} (${amountVal} ${currency})` 
+        .from('restaurant_entries')
+        .insert([{
+          entry_date: todayFormatted,
+          category: 'مصاريف (Expense)',
+          amount: amountUSD,
+          notes: `${notes} (${amountVal} ${currency})`
         }]);
 
       if (error) {
@@ -1200,88 +1127,91 @@
       }
     }
 
-    function filterReport(type) {
-      currentReportFilter = type;
+    async function loadArchiveData() {
+      const selectedDate = document.getElementById('archive-date').value;
+      if (!selectedDate) return;
+      loadData(selectedDate);
+    }
+
+    async function resetTodayEntries() {
+      const selectedDate = document.getElementById('archive-date').value;
+      if (confirm(`Are you sure you want to delete all records for date (${selectedDate})?`)) {
+        const idsToDelete = globalTodayData.map(item => item.id);
+        if (idsToDelete.length === 0) {
+          alert('No records to reset for this date!');
+          return;
+        }
+
+        const { error } = await supabaseClient
+          .from('restaurant_entries')
+          .delete()
+          .in('id', idsToDelete);
+
+        if (error) {
+          alert('Error resetting: ' + error.message);
+        } else {
+          alert('Successfully reset records for this date! ✅');
+          loadData(selectedDate);
+        }
+      }
+    }
+
+    async function deleteEntry(id) {
+      const { error } = await supabaseClient
+        .from('restaurant_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert('Error deleting: ' + error.message);
+      } else {
+        loadData();
+      }
+    }
+
+    function filterReport(filter) {
+      currentReportFilter = filter;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(`tab-${type}`).classList.add('active');
-      renderFilteredReport();
+      document.getElementById('tab-' + filter).classList.add('active');
+      renderReportList();
     }
 
-    function getFilteredReportData() {
-      return globalTodayData.filter(item => {
-        if (currentReportFilter === 'all') return true;
-        if (currentReportFilter === 'sales') return item.type === 'income' && !item.category.includes('معلق:');
-        if (currentReportFilter === 'expenses') return item.type === 'expense';
-        if (currentReportFilter === 'sections') return item.type === 'income' && !item.category.includes('معلق:') && (item.category.includes('صالة') || item.category.includes('تيك أواي') || item.category.includes('دليفري'));
-        return true;
-      });
-    }
-
-    function renderFilteredReport() {
+    function renderReportList() {
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      let html = '';
 
-      if (currentReportFilter === 'all') {
-        let tInc = 0, tExp = 0;
-        globalTodayData.forEach(item => {
-          if (!item.category.includes('معلق:')) {
-            const amtUSD = Number(item.amount);
-            if (item.type === 'income') tInc += amtUSD;
-            if (item.type === 'expense') tExp += amtUSD;
-          }
-        });
-        const tNet = tInc - tExp;
-
-        document.getElementById('today-report').innerHTML = `
-          <div class="summary-card-row" style="background:#f0fdf4; border:1px solid #a7f3d0; color:#047857;">
-            <span>🛍️ Total Sales:</span>
-            <span>${Math.round(tInc * rate).toLocaleString()} LBP ($${tInc.toFixed(2)})</span>
-          </div>
-          <div class="summary-card-row" style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626;">
-            <span>💸 Total Expenses:</span>
-            <span>${Math.round(tExp * rate).toLocaleString()} LBP ($${tExp.toFixed(2)})</span>
-          </div>
-          <div class="summary-card-row" style="background:#ecfdf5; border:1.5px solid #059669; color:#065f46; font-size:14px;">
-            <span>💵 Net Remaining:</span>
-            <span>${Math.round(tNet * rate).toLocaleString()} LBP ($${tNet.toFixed(2)})</span>
-          </div>
-        `;
-        return;
-      }
-
-      let todayHtml = '';
-      const filtered = getFilteredReportData();
-
-      if (filtered.length === 0) {
-        document.getElementById('today-report').innerHTML = 'No records found.';
-        return;
-      }
-
-      filtered.forEach(item => {
+      globalTodayData.forEach(item => {
         const amtUSD = Number(item.amount);
-        const color = item.type === 'income' ? 'income' : 'expense';
-        const sign = item.type === 'income' ? '+' : '-';
-        const lbpValue = Math.round(amtUSD * rate).toLocaleString();
-        
-        todayHtml += `
-          <div class="report-item-compact" onclick="openDetailModal(${item.id})">
-            <div>
-              <strong style="font-size:13px;">📌 ${item.category}</strong>
-              <div style="font-size:10px; color:#94a3b8; margin-top:2px;">Click to view details 🔍</div>
-            </div>
-            <div style="text-align:right;">
-              <div class="${color}" style="font-weight:bold; font-size:13px;">${sign}$${amtUSD.toFixed(2)}</div>
-              <div style="font-size:10px; color:#64748b; font-weight:700;">${sign}${lbpValue} LBP</div>
-            </div>
-          </div>`;
+        const lbpVal = Math.round(amtUSD * rate).toLocaleString();
+        const isExpense = item.category.includes('مصاريف');
+        const isDeliveryPending = item.category.includes('معلق:');
+
+        let show = false;
+        if (currentReportFilter === 'all') show = true;
+        else if (currentReportFilter === 'sales' && !isExpense && !isDeliveryPending) show = true;
+        else if (currentReportFilter === 'expenses' && isExpense) show = true;
+        else if (currentReportFilter === 'sections' && (item.category.includes('داخل المطعم') || item.category.includes('تيك أواي') || item.category.includes('دليفري'))) show = true;
+
+        if (show) {
+          html += `
+            <div class="report-item-compact" onclick="openDetailModal(${id = item.id})">
+              <div>
+                <strong style="color:${isExpense ? '#dc2626' : '#059669'};">${item.category}</strong>
+                <div style="font-size:11px; color:#64748b; margin-top:2px; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.notes || ''}</div>
+              </div>
+              <div style="text-align:right;">
+                <span style="font-weight:bold; font-size:13px;">$${amtUSD.toFixed(2)}</span>
+                <div style="font-size:10px; color:#64748b;">${lbpVal} LBP</div>
+              </div>
+            </div>`;
+        }
       });
 
-      document.getElementById('today-report').innerHTML = todayHtml;
+      document.getElementById('today-report').innerHTML = html || 'No transactions found.';
     }
 
     async function loadData(targetDate) {
-      const rateElem = document.getElementById('exchange-rate');
-      const rate = parseArabicNumber(rateElem.value) || 90000;
-      
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
       const now = new Date();
       const todayStr = targetDate || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       document.getElementById('archive-date').value = todayStr;
@@ -1290,71 +1220,116 @@
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
       const { data, error } = await supabaseClient
-        .from('restaurant_expenses')
+        .from('restaurant_entries')
         .select('*')
         .gte('entry_date', firstDay)
         .lte('entry_date', lastDay)
         .order('id', { ascending: false });
 
       if (error) {
-        document.getElementById('today-report').innerHTML = 'Error loading data: ' + error.message;
+        document.getElementById('today-report').innerHTML = 'Error loading data from Supabase.';
         return;
       }
 
       let mInc = 0, mExp = 0;
       let tInc = 0, tExp = 0;
       let hallTotal = 0, takeawayTotal = 0, deliveryTotal = 0;
+
       globalTodayData = [];
+      const allData = data || [];
 
-      if (data) {
-        data.forEach(item => {
-          const amtUSD = Number(item.amount);
-          
-          if (item.type === 'income' && !item.category.includes('معلق:')) mInc += amtUSD;
-          if (item.type === 'expense') mExp += amtUSD;
+      allData.forEach(item => {
+        const amtUSD = Number(item.amount);
+        const isExpense = item.category.includes('مصاريف');
 
-          if (item.entry_date === todayStr) {
-            globalTodayData.push(item);
+        // Monthly Summary
+        if (isExpense) {
+          mExp += amtUSD;
+        } else {
+          mInc += amtUSD;
+        }
 
-            if (item.type === 'income' && !item.category.includes('معلق:')) {
-              tInc += amtUSD;
-              if (item.category.includes('داخل المطعم')) hallTotal += (amtUSD * rate);
-              else if (item.category.includes('تيك أواي')) takeawayTotal += (amtUSD * rate);
-              else if (item.category.includes('دليفري')) deliveryTotal += (amtUSD * rate);
-            }
-            if (item.type === 'expense') tExp += amtUSD;
+        // Today Summary
+        if (item.entry_date === todayStr) {
+          globalTodayData.push(item);
+
+          if (isExpense) {
+            tExp += amtUSD;
+          } else {
+            tInc += amtUSD;
+            if (item.category.includes('داخل المطعم')) hallTotal += (amtUSD * rate);
+            if (item.category.includes('تيك أواي')) takeawayTotal += (amtUSD * rate);
+            if (item.category.includes('دليفري')) deliveryTotal += (amtUSD * rate);
           }
-        });
+        }
+      });
 
-        document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
-        document.getElementById('today-inc-lbp').innerText = Math.round(tInc * rate).toLocaleString() + ' LBP';
-        document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
-        document.getElementById('today-exp-lbp').innerText = Math.round(tExp * rate).toLocaleString() + ' LBP';
-        
-        document.getElementById('type-hall-total').innerText = Math.round(hallTotal).toLocaleString() + ' LBP';
-        document.getElementById('type-takeaway-total').innerText = Math.round(takeawayTotal).toLocaleString() + ' LBP';
-        document.getElementById('type-delivery-total').innerText = Math.round(deliveryTotal).toLocaleString() + ' LBP';
+      // Render Today
+      document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
+      document.getElementById('today-inc-lbp').innerText = Math.round(tInc * rate).toLocaleString() + ' LBP';
+      document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
+      document.getElementById('today-exp-lbp').innerText = Math.round(tExp * rate).toLocaleString() + ' LBP';
 
-        const tNet = tInc - tExp;
-        const tNetElem = document.getElementById('today-net-usd');
-        tNetElem.innerText = '$' + tNet.toFixed(2);
-        tNetElem.className = 'stat-usd ' + (tNet >= 0 ? 'income' : 'expense');
-        document.getElementById('today-net-lbp').innerText = Math.round(tNet * rate).toLocaleString() + ' LBP';
+      const tNet = tInc - tExp;
+      const netElem = document.getElementById('today-net-usd');
+      netElem.innerText = '$' + tNet.toFixed(2);
+      netElem.className = 'stat-usd ' + (tNet >= 0 ? 'income' : 'expense');
+      document.getElementById('today-net-lbp').innerText = Math.round(tNet * rate).toLocaleString() + ' LBP';
 
-        document.getElementById('month-inc-usd').innerText = '$' + mInc.toFixed(2);
-        document.getElementById('month-inc-lbp').innerText = Math.round(mInc * rate).toLocaleString() + ' LBP';
-        document.getElementById('month-exp-usd').innerText = '$' + mExp.toFixed(2);
-        document.getElementById('month-exp-lbp').innerText = Math.round(mExp * rate).toLocaleString() + ' LBP';
+      document.getElementById('type-hall-total').innerText = Math.round(hallTotal).toLocaleString() + ' LBP';
+      document.getElementById('type-takeaway-total').innerText = Math.round(takeawayTotal).toLocaleString() + ' LBP';
+      document.getElementById('type-delivery-total').innerText = Math.round(deliveryTotal).toLocaleString() + ' LBP';
 
-        const mNet = mInc - mExp;
-        const mNetElem = document.getElementById('month-net-usd');
-        mNetElem.innerText = '$' + mNet.toFixed(2);
-        mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
-        document.getElementById('month-net-lbp').innerText = Math.round(mNet * rate).toLocaleString() + ' LBP';
+      // Render Month
+      const mNet = mInc - mExp;
+      document.getElementById('month-inc-usd').innerText = '$' + mInc.toFixed(2);
+      document.getElementById('month-inc-lbp').innerText = Math.round(mInc * rate).toLocaleString() + ' LBP';
+      document.getElementById('month-exp-usd').innerText = '$' + mExp.toFixed(2);
+      document.getElementById('month-exp-lbp').innerText = Math.round(mExp * rate).toLocaleString() + ' LBP';
 
-        calculateDriverBalance();
-        renderFilteredReport();
-      }
+      const mNetElem = document.getElementById('month-net-usd');
+      mNetElem.innerText = '$' + mNet.toFixed(2);
+      mNetElem.className = 'stat-usd ' + (mNet >= 0 ? 'income' : 'expense');
+      document.getElementById('month-net-lbp').innerText = Math.round(mNet * rate).toLocaleString() + ' LBP';
+
+      renderReportList();
+      calculateDriverBalance();
+    }
+
+    function shareReportWhatsApp() {
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      const selectedDate = document.getElementById('archive-date').value;
+
+      let tInc = 0, tExp = 0;
+      let msg = `📋 *Restaurant Daily Report*\n📅 *Date:* ${selectedDate}\n---------------------\n`;
+
+      globalTodayData.forEach(item => {
+        const amtUSD = Number(item.amount);
+        const isExpense = item.category.includes('مصاريف');
+        if (isExpense) tExp += amtUSD;
+        else tInc += amtUSD;
+
+        const lbpVal = Math.round(amtUSD * rate).toLocaleString();
+        msg += `• ${item.category}: ${lbpVal} LBP ($${amtUSD.toFixed(2)})\n`;
+      });
+
+      const tNet = tInc - tExp;
+      msg += `---------------------\n`;
+      msg += `💰 *Net Remaining:* ${Math.round(tNet * rate).toLocaleString()} LBP ($${tNet.toFixed(2)})\n`;
+
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function shareWhatsApp() {
+      let totalLBP = 0;
+      cart.forEach(item => totalLBP += (item.priceLBP * item.qty));
+      let msg = `🧾 *Invoice / Order*\n---------------------\n`;
+      cart.forEach(item => {
+        msg += `• ${item.name} (x${item.qty}) - ${(item.priceLBP * item.qty).toLocaleString()} LBP\n`;
+      });
+      msg += `---------------------\n`;
+      msg += `💰 *Total:* ${totalLBP.toLocaleString()} LBP\n`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     loadData();
