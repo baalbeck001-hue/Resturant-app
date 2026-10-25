@@ -627,9 +627,6 @@
         <div id="type-delivery-total" style="font-weight:800; color:#0f172a; margin-top:2px;">0 LBP</div>
       </div>
     </div>
-
-    <!-- Detailed Items & Orders Breakdown -->
-    <button onclick="openDetailedReportModal()" style="width:100%; padding:10px; background:#1e293b; color:white; border:none; border-radius:8px; font-weight:800; font-size:12px; margin-top:12px; cursor:pointer;">📊 Show Items & Orders Breakdown (تفاصيل الصحون والطلبات)</button>
   </div>
 
   <!-- Archive & History -->
@@ -749,22 +746,6 @@
       </div>
 
       <button id="detail-delete-btn" style="width:100%; padding:12px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:10px; font-weight:800; font-size:13px; margin-top:14px; cursor:pointer;">🗑️ Delete Transaction</button>
-    </div>
-  </div>
-
-  <!-- Detailed Report Modal (تقرير تفصيلي للصحون وأنواع الطلبات) -->
-  <div class="modal-overlay" id="detailed-report-modal">
-    <div class="modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0; font-size:16px; color:#1e293b;">📊 تفصيل المبيعات والصحون (اليوم)</h3>
-        <button onclick="closeDetailedReportModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
-      </div>
-
-      <div id="detailed-report-content" style="font-size:13px; color:#334155; line-height:1.6; max-height:60vh; overflow-y:auto;">
-        Loading breakdown...
-      </div>
-
-      <button onclick="closeDetailedReportModal()" style="width:100%; padding:12px; background:var(--navy); color:white; border:none; border-radius:8px; font-weight:800; margin-top:14px; cursor:pointer;">إغلاق</button>
     </div>
   </div>
 
@@ -896,64 +877,6 @@
     function openModal() { document.getElementById('cart-modal').classList.add('active'); }
     function closeModal() { document.getElementById('cart-modal').classList.remove('active'); }
 
-    function openDetailedReportModal() {
-      let orderTypesCount = { 'داخل المطعم': 0, 'تيك أواي': 0, 'دليفري': 0 };
-      let orderTypesAmount = { 'داخل المطعم': 0, 'تيك أواي': 0, 'دليفري': 0 };
-      let itemsCount = {};
-
-      globalTodayData.forEach(item => {
-        // إذا كان أوردر مبيعات
-        if (item.category.includes('أوردر') || item.category.includes('داخل المطعم') || item.category.includes('تيك أواي') || item.category.includes('دليفري')) {
-          let type = 'داخل المطعم';
-          if (item.category.includes('تيك أواي')) type = 'تيك أواي';
-          else if (item.category.includes('دليفري')) type = 'دليفري';
-
-          orderTypesCount[type] = (orderTypesCount[type] || 0) + 1;
-          orderTypesAmount[type] = (orderTypesAmount[type] || 0) + Number(item.amount);
-
-          // استخراج تفاصيل الصحون من الـ notes
-          if (item.notes) {
-            let lines = item.notes.split('\n');
-            lines.forEach(line => {
-              // الصيغة عادة: • اسم الصنف (xالكمية) - السعر
-              if (line.includes('x')) {
-                let parts = line.split('x');
-                let itemName = parts[0].replace('•', '').trim();
-                let qtyPart = parts[1].split(' ')[0];
-                let qty = parseInt(qtyPart) || 1;
-                itemsCount[itemName] = (itemsCount[itemName] || 0) + qty;
-              }
-            });
-          }
-        }
-      });
-
-      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
-
-      let html = `<div style="font-weight:bold; color:#047857; margin-bottom:8px;">📍 حسب نوع الطلبات (Order Types):</div>`;
-      html += `• 🏠 داخل المطعم: ${orderTypesCount['داخل المطعم']} أوردر ($${orderTypesAmount['داخل المطعم'].toFixed(2)})<br>`;
-      html += `• 🛍️ تيك أواي: ${orderTypesCount['تيك أواي']} أوردر ($${orderTypesAmount['تيك أواي'].toFixed(2)})<br>`;
-      html += `• 🛵 دليفري: ${orderTypesCount['دليفري']} أوردر ($${orderTypesAmount['دليفري'].toFixed(2)})<br>`;
-
-      html += `<hr style="border:0; border-top:1px solid #cbd5e1; margin:12px 0;">`;
-      html += `<div style="font-weight:bold; color:#1e293b; margin-bottom:8px;">🍲 عدد الصحون والأصناف المباعة (Items Count):</div>`;
-
-      if (Object.keys(itemsCount).length === 0) {
-        html += `<span style="color:#64748b;">لا توجد أصناف مسجلة اليوم.</span>`;
-      } else {
-        for (let [itemName, qty] of Object.entries(itemsCount)) {
-          html += `• <b>${itemName}</b>: ${qty} صحن/حبة<br>`;
-        }
-      }
-
-      document.getElementById('detailed-report-content').innerHTML = html;
-      document.getElementById('detailed-report-modal').classList.add('active');
-    }
-
-    function closeDetailedReportModal() {
-      document.getElementById('detailed-report-modal').classList.remove('active');
-    }
-
     function openDetailModal(id) {
       const item = globalTodayData.find(x => x.id === id);
       if (!item) return;
@@ -1019,9 +942,8 @@
       const d = new Date();
       const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-      // حذف المعلق وإضافته كقبض كاش للصندوق
       const { error: insertError } = await supabaseClient
-        .from('restaurant_entries')
+        .from('restaurant_expenses')
         .insert([{
           entry_date: todayFormatted,
           category: `قبض دليفري (${driver})`,
@@ -1035,7 +957,7 @@
       }
 
       const { error: deleteError } = await supabaseClient
-        .from('restaurant_entries')
+        .from('restaurant_expenses')
         .delete()
         .in('id', pendingIds);
 
@@ -1075,7 +997,7 @@
       }
 
       const { error } = await supabaseClient
-        .from('restaurant_entries')
+        .from('restaurant_expenses')
         .insert([{
           entry_date: todayFormatted,
           category: categoryName,
@@ -1109,7 +1031,7 @@
       const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
       const { error } = await supabaseClient
-        .from('restaurant_entries')
+        .from('restaurant_expenses')
         .insert([{
           entry_date: todayFormatted,
           category: 'مصاريف (Expense)',
@@ -1143,7 +1065,7 @@
         }
 
         const { error } = await supabaseClient
-          .from('restaurant_entries')
+          .from('restaurant_expenses')
           .delete()
           .in('id', idsToDelete);
 
@@ -1158,7 +1080,7 @@
 
     async function deleteEntry(id) {
       const { error } = await supabaseClient
-        .from('restaurant_entries')
+        .from('restaurant_expenses')
         .delete()
         .eq('id', id);
 
@@ -1194,7 +1116,7 @@
 
         if (show) {
           html += `
-            <div class="report-item-compact" onclick="openDetailModal(${id = item.id})">
+            <div class="report-item-compact" onclick="openDetailModal(${item.id})">
               <div>
                 <strong style="color:${isExpense ? '#dc2626' : '#059669'};">${item.category}</strong>
                 <div style="font-size:11px; color:#64748b; margin-top:2px; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.notes || ''}</div>
@@ -1220,7 +1142,7 @@
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
       const { data, error } = await supabaseClient
-        .from('restaurant_entries')
+        .from('restaurant_expenses')
         .select('*')
         .gte('entry_date', firstDay)
         .lte('entry_date', lastDay)
@@ -1242,14 +1164,12 @@
         const amtUSD = Number(item.amount);
         const isExpense = item.category.includes('مصاريف');
 
-        // Monthly Summary
         if (isExpense) {
           mExp += amtUSD;
         } else {
           mInc += amtUSD;
         }
 
-        // Today Summary
         if (item.entry_date === todayStr) {
           globalTodayData.push(item);
 
@@ -1264,7 +1184,6 @@
         }
       });
 
-      // Render Today
       document.getElementById('today-inc-usd').innerText = '$' + tInc.toFixed(2);
       document.getElementById('today-inc-lbp').innerText = Math.round(tInc * rate).toLocaleString() + ' LBP';
       document.getElementById('today-exp-usd').innerText = '$' + tExp.toFixed(2);
@@ -1280,7 +1199,6 @@
       document.getElementById('type-takeaway-total').innerText = Math.round(takeawayTotal).toLocaleString() + ' LBP';
       document.getElementById('type-delivery-total').innerText = Math.round(deliveryTotal).toLocaleString() + ' LBP';
 
-      // Render Month
       const mNet = mInc - mExp;
       document.getElementById('month-inc-usd').innerText = '$' + mInc.toFixed(2);
       document.getElementById('month-inc-lbp').innerText = Math.round(mInc * rate).toLocaleString() + ' LBP';
@@ -1303,6 +1221,9 @@
       let tInc = 0, tExp = 0;
       let msg = `📋 *Restaurant Daily Report*\n📅 *Date:* ${selectedDate}\n---------------------\n`;
 
+      globalTodayData.globalTodayData.forEach?.(item => {
+        // safety check
+      });
       globalTodayData.forEach(item => {
         const amtUSD = Number(item.amount);
         const isExpense = item.category.includes('مصاريف');
