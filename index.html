@@ -425,7 +425,6 @@
       margin-top: 10px;
     }
 
-    /* Pending Delivery Order Item */
     .pending-order-box {
       background: #ffffff;
       border: 1px solid #cbd5e1;
@@ -519,9 +518,9 @@
     </div>
   </div>
 
-  <!-- Settle Driver Account -->
+  <!-- Settle Driver Account & Daily Report -->
   <div class="card" style="border-color: #a7f3d0; background: #f0fdf4;">
-    <h3 style="color: #15803d;">🛵 Settle Driver Account & Pending Deliveries</h3>
+    <h3 style="color: #15803d;">🛵 Settle Driver Account & Daily Orders</h3>
     
     <label>Select Driver:</label>
     <select id="settle-driver-select" onchange="calculateDriverBalance()">
@@ -533,17 +532,21 @@
 
     <div class="driver-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-weight:bold; font-size:13px; color:#166534;">Total Pending Amount:</span>
+        <span style="font-weight:bold; font-size:13px; color:#166534;">عدد الطلبات اليوم (Total Orders):</span>
+        <span id="driver-orders-count" style="font-weight:900; font-size:15px; color:#047857;">0 طلبات</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+        <span style="font-weight:bold; font-size:13px; color:#166534;">إجمالي المبالغ المعلقة:</span>
         <span id="driver-pending-lbp" style="font-weight:900; font-size:15px; color:#d97706;">0 LBP</span>
       </div>
       <div style="font-size:11px; color:#64748b; text-align:right; margin-top:2px;" id="driver-pending-usd">Equivalent: $0.00</div>
     </div>
 
-    <!-- قائمة الطلبات المعلقة للدليفري المحدد مع زر تسليم فردي عند الاستلام -->
+    <!-- قائمة الطلبات المعلقة للدليفري المحدد مع زر استلام فردي -->
     <div style="margin-top:12px;">
-      <label style="color:#047857; font-weight:800;">📋 Delivery Orders List (الطلبات المعلقة للدليفري):</label>
+      <label style="color:#047857; font-weight:800;">📋 Delivery Orders List (طلبات الدراج اليوم):</label>
       <div id="driver-pending-orders-list" style="max-height: 220px; overflow-y: auto; margin-top: 6px;">
-        <div style="font-size:12px; color:#64748b; text-align:center; padding:10px;">لا توجد طلبات معلقة لهذا السائق.</div>
+        <div style="font-size:12px; color:#64748b; text-align:center; padding:10px;">لا توجد طلبات لهذا السائق.</div>
       </div>
     </div>
 
@@ -994,7 +997,7 @@
     function openModal() { document.getElementById('cart-modal').classList.add('active'); calculateChange(); }
     function closeModal() { document.getElementById('cart-modal').classList.remove('active'); }
 
-    // حساب وعرض الطلبات المعلقة للدليفري مع زر تسليم فردي (عند استلام الدليفري للطلبية)
+    // تقرير السائقين اليومي: عدد الطلبات، القائمة التفصيلية، وزر استلام الطلبية الفردية
     function calculateDriverBalance() {
       const driver = document.getElementById('settle-driver-select').value;
       const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
@@ -1026,29 +1029,28 @@
       });
 
       const pendingLBP = Math.round(pendingUSD * rate);
+      document.getElementById('driver-orders-count').innerText = count + ' طلبات';
       document.getElementById('driver-pending-lbp').innerText = pendingLBP.toLocaleString() + ' LBP';
       document.getElementById('driver-pending-usd').innerText = 'Equivalent: $' + pendingUSD.toFixed(2);
 
       const container = document.getElementById('driver-pending-orders-list');
       if (count === 0) {
-        container.innerHTML = `<div style="font-size:12px; color:#64748b; text-align:center; padding:10px;">لا توجد طلبات معلقة لهذا السائق حالياً.</div>`;
+        container.innerHTML = `<div style="font-size:12px; color:#64748b; text-align:center; padding:10px;">لا توجد طلبات لهذا السائق.</div>`;
       } else {
         container.innerHTML = pendingOrdersHtml;
       }
     }
 
-    // تسليم طلب فردي للدليفري بنقرة واحدة عند الاستلام
+    // تسليم طلب فردي للسائق عند الاستلام ونقله للصندوق
     async function settleSingleDriverOrder(orderId, driverName, orderUSD) {
-      if (confirm(`هل أنت متأكد أن السائق (${driverName}) استلم هذه الطلبية وتم تسويتها؟`)) {
+      if (confirm(`هل أنت متأكد أن السائق (${driverName}) استلم هذه الطلبية وتم قبضها؟`)) {
         const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
         
-        // حذف الطلب المعلق من جدول الدليفري المعلق
         await supabaseClient.from('restaurant_expenses').delete().eq('id', orderId);
 
         const d = new Date();
         const todayFormatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-        // إضافته للمبيعات الصافية بالمحل (Register)
         const { error } = await supabaseClient.from('restaurant_expenses').insert([{
           entry_date: todayFormatted,
           type: 'income',
@@ -1060,7 +1062,7 @@
         if (error) {
           alert('خطأ أثناء تسوية الطلبية: ' + error.message);
         } else {
-          alert(`تم استلام وتسوية الطلبية بنجاح! ✅`);
+          alert(`تم استلاستلام وتسوية الطلبية بنجاح! ✅`);
           loadData();
         }
       }
@@ -1075,7 +1077,7 @@
         return;
       }
 
-      if (confirm(`هل أنت متأكد من تسوية كل حساب الطلبات المعلقة للسائق (${driver}) ونقل المبالغ بالكامل للصندوق؟`)) {
+      if (confirm(`هل أنت متأكد من تسوية كافة حساب الطلبات المعلقة للسائق (${driver}) دفعة واحدة ونقلها للصندوق؟`)) {
         const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
         let totalUSD = 0;
         const idsToDelete = [];
