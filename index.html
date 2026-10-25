@@ -702,6 +702,12 @@
     <div id="float-total-lbp" style="font-size:16px;">0 LBP</div>
   </div>
 
+  <!-- زر مصاريف اليوم العائم على جنب الشاشة -->
+  <div onclick="openDayExpensesReportModal()" style="position: fixed; bottom: 85px; right: 16px; background: #dc2626; color: white; padding: 12px 16px; border-radius: 50px; font-weight: 800; font-size: 13px; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); cursor: pointer; z-index: 999; display: flex; align-items: center; gap: 6px;">
+    <span>💸</span>
+    <span>مصاريف اليوم</span>
+  </div>
+
   <!-- Cart Modal -->
   <div class="modal-overlay" id="cart-modal">
     <div class="modal-card">
@@ -794,6 +800,22 @@
       </div>
 
       <button onclick="closeDetailedReportModal()" style="width:100%; padding:12px; background:var(--navy); color:white; border:none; border-radius:8px; font-weight:800; margin-top:14px; cursor:pointer;">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- نافذة تفصيل المصاريف والصرف اليومي العائمة (Modal) -->
+  <div class="modal-overlay" id="day-expenses-report-modal">
+    <div class="modal-card" style="border: 2px solid #dc2626;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:16px; color:#dc2626;">💸 تفصيل المصاريف والصرف (اليوم)</h3>
+        <button onclick="closeDayExpensesReportModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
+      </div>
+
+      <div id="day-expenses-report-content" style="font-size:13px; color:#334155; line-height:1.6; max-height:60vh; overflow-y:auto; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
+        Loading expenses...
+      </div>
+
+      <button onclick="closeDayExpensesReportModal()" style="width:100%; padding:12px; background:var(--navy); color:white; border:none; border-radius:8px; font-weight:800; margin-top:14px; cursor:pointer;">إغلاق</button>
     </div>
   </div>
 
@@ -925,7 +947,6 @@
       calculateChange();
     }
 
-    // دالة حساب الباقي للزبون (Change Calculator)
     function calculateChange() {
       let totalLBP = 0;
       cart.forEach(item => totalLBP += (item.priceLBP * item.qty));
@@ -952,6 +973,69 @@
 
     function openModal() { document.getElementById('cart-modal').classList.add('active'); calculateChange(); }
     function closeModal() { document.getElementById('cart-modal').classList.remove('active'); }
+
+    // دوال زر مصاريف اليوم العائم
+    function openDayExpensesReportModal() {
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      const selectedDate = document.getElementById('archive-date').value || new Date().toISOString().split('T')[0];
+
+      let expensesList = [];
+      let totalExpUSD = 0;
+
+      globalTodayData.forEach(item => {
+        if (item.type === 'expense' || item.category.includes('مصاريف')) {
+          const amtUSD = Number(item.amount);
+          totalExpUSD += amtUSD;
+          expensesList.push({
+            category: item.category,
+            notes: item.notes || 'بدون تفاصيل',
+            amountUSD: amtUSD,
+            amountLBP: Math.round(amtUSD * rate)
+          });
+        }
+      });
+
+      let html = `<div style="font-weight:bold; color:#dc2626; margin-bottom:8px; font-size:14px;">📅 تاريخ اليوم: ${selectedDate}</div>`;
+      html += `<hr style="border:0; border-top:1px solid #cbd5e1; margin:8px 0;">`;
+
+      if (expensesList.length === 0) {
+        html += `<div style="color:#64748b; text-align:center; padding:15px;">لا توجد مصاريف أو مبالغ مصروفة مسجلة لهذا اليوم حتى الآن ✅</div>`;
+      } else {
+        html += `<div style="display:flex; flex-direction:column; gap:8px;">`;
+        expensesList.forEach((exp, index) => {
+          html += `
+            <div style="background:#ffffff; padding:10px; border-radius:8px; border:1px solid #fca5a5; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <strong style="color:#dc2626; font-size:13px;">${index + 1}. ${exp.category}</strong>
+                <div style="font-size:11px; color:#475569; margin-top:2px;">${exp.notes}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-weight:900; color:#dc2626; font-size:13px;">-$${exp.amountUSD.toFixed(2)}</div>
+                <div style="font-size:10px; color:#64748b; font-weight:700;">-${exp.amountLBP.toLocaleString()} LBP</div>
+              </div>
+            </div>`;
+        });
+        html += `</div>`;
+      }
+
+      const totalExpLBP = Math.round(totalExpUSD * rate);
+      html += `<hr style="border:0; border-top:2px dashed #dc2626; margin:12px 0;">`;
+      html += `
+        <div style="display:flex; justify-content:space-between; align-items:center; font-weight:900; font-size:14px; color:#dc2626; background:#fee2e2; padding:10px; border-radius:8px;">
+          <span>إجمالي الصرف (Total Expenses):</span>
+          <div style="text-align:right;">
+            <div>$${totalExpUSD.toFixed(2)}</div>
+            <div style="font-size:11px;">${totalExpLBP.toLocaleString()} LBP</div>
+          </div>
+        </div>`;
+
+      document.getElementById('day-expenses-report-content').innerHTML = html;
+      document.getElementById('day-expenses-report-modal').classList.add('active');
+    }
+
+    function closeDayExpensesReportModal() {
+      document.getElementById('day-expenses-report-modal').classList.remove('active');
+    }
 
     function openDetailedReportModal() {
       let orderTypesCount = { 'داخل المطعم': 0, 'تيك أواي': 0, 'دليفري': 0 };
