@@ -639,7 +639,7 @@
       </div>
     </div>
 
-    <!-- زر التقرير التفصيلي الجديد للصحون وأنواع الطلبات -->
+    <!-- زر التقرير التفصيلي للصحون وأنواع الطلبات -->
     <button onclick="openDetailedReportModal()" style="width:100%; padding:10px; background:#1e293b; color:white; border:none; border-radius:8px; font-weight:800; font-size:12px; margin-top:12px; cursor:pointer;">📊 تفصيل المبيعات والصحون (Items & Orders Breakdown)</button>
   </div>
 
@@ -706,7 +706,7 @@
   <div class="modal-overlay" id="cart-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0; font-size:16px; color:#1e293b;">🧾 Order Review</h3>
+        <h3 style="margin:0; font-size:16px; color:#1e293b;">🧾 Order Review & Cashier</h3>
         <button onclick="closeModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">✕</button>
       </div>
 
@@ -736,6 +736,24 @@
         <div style="font-size:12px; color:#64748b;" id="modal-total-usd">Equivalent: $0.00</div>
       </div>
 
+      <!-- قسم حاسبة الباقي (Cash Given / Change Calculator) -->
+      <div style="background:#f0fdf4; border:1px solid #86efac; padding:12px; border-radius:10px; margin-top:14px;">
+        <label style="color:#166534; font-weight:800; margin-top:0;">💵 Cash Given by Customer (ما قَبَضَهُ الزبون):</label>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <input type="text" id="cash-given" placeholder="0" oninput="fixNumbers(this); calculateChange();" style="flex:2; font-weight:bold; font-size:15px; text-align:center;">
+          <select id="cash-currency" onchange="calculateChange()" style="flex:1; font-weight:bold;">
+            <option value="LBP">LBP (ليرة)</option>
+            <option value="USD">USD ($)</option>
+          </select>
+        </div>
+        
+        <div style="margin-top:10px; background:#ffffff; padding:10px; border-radius:8px; border:1px solid #bbf7d0; text-align:center;">
+          <div style="font-size:11px; color:#166534; font-weight:bold; text-transform:uppercase;">Baqui / Change (الباقي الواجب إرجاعه):</div>
+          <div id="change-lbp" style="font-size:16px; font-weight:900; color:#047857; margin-top:2px;">0 LBP</div>
+          <div id="change-usd" style="font-size:12px; font-weight:800; color:#475569;">Equivalent: $0.00</div>
+        </div>
+      </div>
+
       <button class="btn-save" id="save-order-btn" onclick="saveOrder()">✅ Save Order to Register</button>
       <button class="btn-wa" onclick="shareWhatsApp()">📲 Send Invoice via WhatsApp</button>
       <button onclick="clearCart(); closeModal();" style="width:100%; background:none; border:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:10px; cursor:pointer;">🗑️ Clear Order & Close</button>
@@ -763,7 +781,7 @@
     </div>
   </div>
 
-  <!-- Detailed Report Modal (النافذة المنبثقة للتفصيل) -->
+  <!-- Detailed Report Modal -->
   <div class="modal-overlay" id="detailed-report-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -851,6 +869,7 @@
 
     function clearCart() {
       cart = [];
+      document.getElementById('cash-given').value = '';
       renderCart();
     }
 
@@ -902,12 +921,38 @@
 
       document.getElementById('modal-total-lbp').innerText = totalLBP.toLocaleString() + ' LBP';
       document.getElementById('modal-total-usd').innerText = 'Equivalent: $' + totalUSD.toFixed(2);
+      
+      calculateChange();
     }
 
-    function openModal() { document.getElementById('cart-modal').classList.add('active'); }
+    // دالة حساب الباقي للزبون (Change Calculator)
+    function calculateChange() {
+      let totalLBP = 0;
+      cart.forEach(item => totalLBP += (item.priceLBP * item.qty));
+
+      const rate = parseArabicNumber(document.getElementById('exchange-rate').value) || 90000;
+      const cashGivenVal = parseArabicNumber(document.getElementById('cash-given').value);
+      const cashCurrency = document.getElementById('cash-currency').value;
+
+      let cashGivenLBP = 0;
+      if (cashCurrency === 'USD') {
+        cashGivenLBP = cashGivenVal * rate;
+      } else {
+        cashGivenLBP = cashGivenVal;
+      }
+
+      let diffLBP = cashGivenLBP - totalLBP;
+      if (diffLBP < 0) diffLBP = 0;
+
+      const diffUSD = diffLBP / rate;
+
+      document.getElementById('change-lbp').innerText = Math.round(diffLBP).toLocaleString() + ' LBP';
+      document.getElementById('change-usd').innerText = 'Equivalent: $' + diffUSD.toFixed(2);
+    }
+
+    function openModal() { document.getElementById('cart-modal').classList.add('active'); calculateChange(); }
     function closeModal() { document.getElementById('cart-modal').classList.remove('active'); }
 
-    // دوال تقرير الصحون وأنواع الطلبات
     function openDetailedReportModal() {
       let orderTypesCount = { 'داخل المطعم': 0, 'تيك أواي': 0, 'دليفري': 0 };
       let orderTypesAmount = { 'داخل المطعم': 0, 'تيك أواي': 0, 'دليفري': 0 };
